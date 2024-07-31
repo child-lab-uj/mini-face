@@ -1,5 +1,4 @@
 # gaze-tracking
-<br>
 
 ## Na chwilę obecną: demo OpenFace
 Na ten moment zaimplementowane jest tylko proste wykrywanie twarzy przy użyciu MTCNN i OpenFace.
