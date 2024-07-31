@@ -11,7 +11,8 @@ int main()
     if constexpr (RUN_VIDEO) {
         VideoIO video(INPUT_FILE, OUTPUT_FILE);
 
-        FaceExtractor extractor;
+        FaceExtractor extractor(2, 0.5f);
+        FaceVisualizer visualizer;
 
         std::cout << "Reading " << INPUT_FILE << " video...\n";
         for (int i = 0; i < MAX_NO_FRAMES; i++)
@@ -22,10 +23,11 @@ int main()
 
             Frame frame = frameOpt.value();
 
-            extractor.process(frame);
-            auto faces = extractor.selectFaces();
-            if (!faces.empty())
-                std::cout << "Kurwa sukces XD\n";
+            std::cout << "Frame " << i << "\n";
+            if (extractor.process(frame)) {
+                Frame result = visualizer.process(frame, &extractor);
+                video.saveNextFrame(result);
+            }
         }
     }
     // Test mode - image parsing

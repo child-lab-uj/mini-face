@@ -13,7 +13,8 @@
 class Extractor
 {
 public:
-    virtual void process(const Frame& frame) = 0;
+    // Returns true if any face has been succesfully detected
+    virtual bool process(const Frame& frame) = 0;
 };
 
 
@@ -28,7 +29,7 @@ class FaceExtractor : public Extractor
 public:
     FaceExtractor(int maxNoFaces = 2, float threshold = 0.5);
 
-    void process(const Frame& frame) override;
+    bool process(const Frame& frame) override;
 
     // Returns no more than (maxNoFaces) results with best confidence, all with confidence above (threshold)
     std::vector<BoundingBox> selectFaces();
@@ -56,7 +57,7 @@ public:
     LandmarkExtractor() = default;
     LandmarkExtractor(std::vector<std::string>& args);
 
-    void process(const Frame& frame) override;
+    bool process(const Frame& frame) override;
 
     LandmarkDetector::FaceModelParameters params;
     LandmarkDetector::CLNF faceModel;
