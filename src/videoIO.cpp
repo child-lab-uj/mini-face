@@ -20,51 +20,57 @@ namespace {
 
 
 // ---------------
+// ImageIO methods
+// ---------------
+
+ImageIO::ImageIO(std::string imageFilepath)
+{
+    if (!OpenImageFiles({imageFilepath}))
+        throw std::runtime_error("Unable to load image from: " + imageFilepath);
+    
+    image = GetNextImage();
+}
+
+Frame ImageIO::loadImage()
+{
+    return image;
+}
+
+CameraCalibration ImageIO::getCalibration() const
+{
+    return { this->fx, this->fy, this->cx, this->cy };
+}
+
+
+// ---------------
 // VideoIO methods
 // ---------------
 
 VideoIO::VideoIO(std::string inputFilepath, std::string outputFilepath, VideoMode mode)
-    : input(inputFilepath), output(outputFilepath, codec_type(mode), getFps(), cv::Size(getFrameWidth(), getFrameHeight()))
+    : Utilities::SequenceCapture()
 {
-    if (!input.isOpened())
-        throw std::runtime_error("Unable to open video: " + inputFilepath);
-    if (!output.isOpened())
-        throw std::runtime_error("Unable to save video to: " + outputFilepath);
-}
+    // Read setup
+    if (!OpenVideoFile(inputFilepath))
+        throw std::runtime_error("Unable to load video from: " + inputFilepath);
 
-VideoIO::~VideoIO()
-{
-    input.release();
-    output.release();
+    // Write setup
+    output = std::make_unique<cv::VideoWriter>(outputFilepath, codec_type(mode), fps, cv::Size(frame_width, frame_height));
+    if (!output->isOpened())
+        throw std::runtime_error("Unable to save video to: " + outputFilepath);
 }
 
 std::optional<Frame> VideoIO::loadNextFrame()
 {
-    cv::Mat frame;
-
-    input >> frame;
-    if (frame.empty())
-        return std::nullopt;
-    
-    return std::make_optional(frame);
+    Frame frame = GetNextFrame();
+    return frame.empty() ? std::nullopt : std::make_optional(frame);
 }
 
 void VideoIO::saveNextFrame(const Frame& frame)
 {
-    output.write(frame);
+    output->write(frame);
 }
 
-int VideoIO::getFrameWidth() const
+CameraCalibration VideoIO::getCalibration() const
 {
-    return static_cast<int>(input.get(cv::CAP_PROP_FRAME_WIDTH));
-}
-
-int VideoIO::getFrameHeight() const
-{
-    return static_cast<int>(input.get(cv::CAP_PROP_FRAME_HEIGHT));
-}
-
-int VideoIO::getFps() const
-{
-    return static_cast<int>(input.get(cv::CAP_PROP_FPS));
+    return { this->fx, this->fy, this->cx, this->cy };
 }

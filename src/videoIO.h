@@ -2,9 +2,12 @@
 
 #include "../config.h"
 #include <opencv2/opencv.hpp>
+#include <SequenceCapture.h>
+#include <ImageCapture.h>
 #include <iostream>
 #include <string>
 #include <optional>
+#include <memory>
 
 
 // --------------
@@ -22,30 +25,52 @@ enum class VideoMode {
     NONE = 0
 };
 
+struct CameraCalibration
+{
+    float fx;
+    float fy;
+    float cx;
+    float cy;
+};
+
+
+// -------------
+// ImageIO class
+// -------------
+
+class ImageIO : public Utilities::ImageCapture
+{
+public:
+    ImageIO(std::string imageFilepath);
+
+    // Image read
+    Frame loadImage();
+
+    // Getters
+    CameraCalibration getCalibration() const;
+
+private:
+    Frame image;
+};
+
 
 // -------------
 // VideoIO class
 // -------------
 
-class VideoIO
+class VideoIO : public Utilities::SequenceCapture
 {
 public:
     VideoIO(std::string inputFilepath, std::string outputFilepath, VideoMode mode = VideoMode::XVID);
-    ~VideoIO();
 
     // Frame read & write
     std::optional<Frame> loadNextFrame();
     void saveNextFrame(const Frame& frame);
 
     // Getters
-    int getFrameWidth() const;
-    int getFrameHeight() const;
-    int getFps() const;
+    CameraCalibration getCalibration() const;
 
 private:
-    // Video read
-    cv::VideoCapture input;
-
     // Video write
-    cv::VideoWriter output;
+    std::unique_ptr<cv::VideoWriter> output;
 };
