@@ -1,9 +1,9 @@
 # Gaze-tracking
 
-## Na chwilę obecną: demo OpenFace
-Na ten moment zaimplementowane jest tylko proste wykrywanie twarzy przy użyciu MTCNN i OpenFace.
-OpenFace jest zarazem dosyć skomplikowana w użyciu jak i posiadająca duży potencjał, więc wraz z coraz lepszym zrozumieniem funkcjonalności OpenFace 
-będą pojawiały się tu nowe elementy, których finalnym celem jest obliczenie kierunku wzroku postaci znajdujących się na zdjęciu / nagraniu.
+## Aktualny stan
+Na ten moment zaimplementowany został komplet modułów do wykrywania poszczególnych elementów - obszaru twarzy, znaczników twarzy (landmarks), pozy twarzy oraz śledzenia kierunku wzroku (gaze tracking).
+Całość jest wciąż skonstruowana głównie pod kątemn ręcznego testowania, dlatego też kolejnymi krokami będzie zbudowanie API do łatwej obsługi odpowiedniego modułu, a także konteneryzacja.
+Oczywiście wszelkie uwagi mile widziane :)
 
 
 ## Krótki opis struktury projektu:
