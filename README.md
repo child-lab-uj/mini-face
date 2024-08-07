@@ -2,7 +2,7 @@
 
 ## Aktualny stan
 Na ten moment zaimplementowany został komplet modułów do wykrywania poszczególnych elementów - obszaru twarzy, znaczników twarzy (landmarks), pozy twarzy oraz śledzenia kierunku wzroku (gaze tracking).
-Całość jest wciąż skonstruowana głównie pod kątemn ręcznego testowania, dlatego też kolejnymi krokami będzie zbudowanie API do łatwej obsługi odpowiedniego modułu, a także konteneryzacja.
+Całość jest wciąż skonstruowana głównie pod kątemn ręcznego testowania, dlatego też kolejnymi krokami będą zbudowanie API do łatwej obsługi odpowiedniego modułu, a także konteneryzacja.
 Oczywiście wszelkie uwagi mile widziane :)
 
 
