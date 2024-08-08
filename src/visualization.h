@@ -11,6 +11,8 @@
 class VisualizerIf
 {
 public:
+    virtual ~VisualizerIf() {}
+
     virtual Frame process(const Frame& frame, Extractor* extractor) = 0;
 };
 

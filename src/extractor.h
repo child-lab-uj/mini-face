@@ -13,6 +13,8 @@
 class Extractor
 {
 public:
+    virtual ~Extractor() {}
+
     // Returns true if any face has been succesfully detected
     virtual bool process(const Frame& frame) = 0;
 };
