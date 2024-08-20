@@ -1,6 +1,7 @@
 #pragma once
 
 #include "videoIO.h"
+#include <iostream>
 #include <vector>
 
 #include <LandmarkCoreIncludes.h>
@@ -68,6 +69,8 @@ public:
     // Abstract method for reseting data containers or variables
     virtual void resetResults() = 0;
 
+    int noDetections = 0;
+
 protected:
     LandmarkDetector::FaceModelParameters params;
     LandmarkDetector::CLNF faceModel;
@@ -134,6 +137,10 @@ public:
 
     void saveResults() override;
     void resetResults() override;
+
+    // Extracting eye center
+    enum Eye {LEFT_EYE = 0, RIGHT_EYE};
+    cv::Point3f eyeCenter(int person, Eye eye) const;
 
     std::vector<GazeData> gazeData;
     std::vector<std::vector<cv::Point2f>> eyeLandmarks2D;

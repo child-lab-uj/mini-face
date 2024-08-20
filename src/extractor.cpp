@@ -1,7 +1,6 @@
 #include "extractor.h"
 #include <GazeEstimation.h>
 #include <algorithm>
-#include <iostream>
 
 
 // ---------------------
@@ -71,6 +70,8 @@ FaceDetailExtractor::FaceDetailExtractor(std::vector<std::string>& args, bool vi
 
 bool FaceDetailExtractor::process(const Frame& frame)
 {
+    noDetections = 0;
+
     // Extract faces
     if (!FaceExtractor::process(frame))
         return false;
@@ -87,6 +88,7 @@ bool FaceDetailExtractor::process(const Frame& frame)
 
         // Store results
         if (result) {
+            noDetections++;
             saveResults();
         }
     }
@@ -189,4 +191,20 @@ void GazeExtractor::resetResults()
     gazeData.clear();
     eyeLandmarks2D.clear();
     eyeLandmarks3D.clear();
+}
+
+cv::Point3f GazeExtractor::eyeCenter(int person, Eye eye) const
+{
+    cv::Point3f middle(0, 0, 0);
+
+    if (person >= noDetections)
+        return middle;
+    const auto& landmarks3D = eyeLandmarks3D[person];
+    
+    // Calculate eye center based on detected landmarks
+    for (int i = 0; i < 8; i++) 
+        middle = middle + landmarks3D[int(eye) * landmarks3D.size() / 2 + i];
+    middle = middle / 8;
+
+    return middle;
 }

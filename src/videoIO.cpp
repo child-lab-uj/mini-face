@@ -54,9 +54,11 @@ VideoIO::VideoIO(std::string inputFilepath, std::string outputFilepath, VideoMod
         throw std::runtime_error("Unable to load video from: " + inputFilepath);
 
     // Write setup
-    output = std::make_unique<cv::VideoWriter>(outputFilepath, codec_type(mode), fps, cv::Size(frame_width, frame_height));
-    if (!output->isOpened())
-        throw std::runtime_error("Unable to save video to: " + outputFilepath);
+    if (outputFilepath != "") {
+        output = std::make_unique<cv::VideoWriter>(outputFilepath, codec_type(mode), fps, cv::Size(frame_width, frame_height));
+        if (!output->isOpened())
+            throw std::runtime_error("Unable to save video to: " + outputFilepath);
+    }
 }
 
 std::optional<Frame> VideoIO::loadNextFrame()
