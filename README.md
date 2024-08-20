@@ -10,6 +10,7 @@ Oczywiście wszelkie uwagi mile widziane :)
 Na ten moment API jest niekompletne, choć zdatne do podstawowego użytku. Poczyniłem założenie, iż najefektywniejszym sposobem komunikacji z modułem będzie
 uruchomienie go jako osobnego procesu i odczyt wyników z pliku. Jest to o tyle lepsze pod względem wydajnościowym, że nie wprowadza dodatkowego narzutu wynikającego z sieciowego przesyłu danych (wariant
 z kontenerem Dockera) i pozwala w prosty sposób osiągnąć wielowątkowość - można delegować osobny proces do nagrań video z każdej z kamer, tym samym przyśpieszając przetwarzanie.
+Oczywiście kwestia ta jest do uzgodnienia. Jeżeli wymogi projektu wymuszą inny sposób komunikacji to jestem gotowy na odpowiednie dostosowanie modułu.
 <br>
 
 ## Krótki opis struktury projektu:
