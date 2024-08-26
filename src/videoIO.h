@@ -69,6 +69,7 @@ public:
 
     // Getters
     CameraCalibration getCalibration() const;
+    double getCurrentTimestamp() const;
 
 private:
     // Video write

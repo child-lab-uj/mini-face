@@ -7,12 +7,12 @@
 // FaceExtractor methods
 // ---------------------
 
-FaceExtractor::FaceExtractor(int maxNoFaces, float threshold)
-    : detector(MTCNN_MODEL_FILE), maxNoFaces(maxNoFaces), threshold(threshold)
+FaceExtractor::FaceExtractor(int maxNoFaces)
+    : detector(MTCNN_MODEL_FILE), maxNoFaces(maxNoFaces), threshold(FACE_DETECTION_THRESHOLD)
 {
 }
 
-bool FaceExtractor::process(const Frame& frame)
+bool FaceExtractor::process(const Frame& frame, double timestamp)
 {
     // std::cout << "[FaceExtractor]: processing frame...\n";
     detectedFaces.clear();
@@ -53,28 +53,29 @@ std::vector<BoundingBox> FaceExtractor::selectFaces()
 // FaceDetailExtractor interface methods
 // -------------------------------------
 
-FaceDetailExtractor::FaceDetailExtractor(bool video, int maxNoFaces, float threshold)
-    : FaceExtractor(maxNoFaces, threshold),
+FaceDetailExtractor::FaceDetailExtractor(bool video, int maxNoFaces)
+    : FaceExtractor(maxNoFaces),
       faceModel(params.model_location),
       video(video)
 {
 }
 
-FaceDetailExtractor::FaceDetailExtractor(std::vector<std::string>& args, bool video, int maxNoFaces, float threshold)
-    : FaceExtractor(maxNoFaces, threshold),
+FaceDetailExtractor::FaceDetailExtractor(std::vector<std::string>& args, bool video, int maxNoFaces)
+    : FaceExtractor(maxNoFaces),
       params(LandmarkDetector::FaceModelParameters(args)),
       faceModel(params.model_location),
       video(video)
 {
 }
 
-bool FaceDetailExtractor::process(const Frame& frame)
+bool FaceDetailExtractor::process(const Frame& frame, double timestamp)
 {
     noDetections = 0;
 
     // Extract faces
     if (!FaceExtractor::process(frame))
         return false;
+
     auto faces = FaceExtractor::selectFaces();
 
     // Perform landmark detection for each of detected faces
@@ -85,6 +86,8 @@ bool FaceDetailExtractor::process(const Frame& frame)
         bool result = video ? LandmarkDetector::DetectLandmarksInVideo(frame, bbox, faceModel, params, emptyFrame) :
                               LandmarkDetector::DetectLandmarksInImage(frame, bbox, faceModel, params, emptyFrame);
         anySuccess = anySuccess || result;
+
+        processFrame(frame, timestamp, result);
 
         // Store results
         if (result) {
@@ -101,13 +104,13 @@ bool FaceDetailExtractor::process(const Frame& frame)
 // LandmarkExtractor methods
 // -------------------------
 
-LandmarkExtractor::LandmarkExtractor(bool video, int maxNoFaces, float threshold)
-    : FaceDetailExtractor(video, maxNoFaces, threshold)
+LandmarkExtractor::LandmarkExtractor(bool video, int maxNoFaces)
+    : FaceDetailExtractor(video, maxNoFaces)
 {
 }
 
-LandmarkExtractor::LandmarkExtractor(std::vector<std::string>& args, bool video, int maxNoFaces, float threshold)
-    : FaceDetailExtractor(args, video, maxNoFaces, threshold)
+LandmarkExtractor::LandmarkExtractor(std::vector<std::string>& args, bool video, int maxNoFaces)
+    : FaceDetailExtractor(args, video, maxNoFaces)
 {
 }
 
@@ -131,14 +134,14 @@ void LandmarkExtractor::resetResults()
 // PoseExtractor methods
 // ---------------------
 
-PoseExtractor::PoseExtractor(CameraCalibration ccal, bool video, int maxNoFaces, float threshold)
-    : FaceDetailExtractor(video, maxNoFaces, threshold),
+PoseExtractor::PoseExtractor(CameraCalibration ccal, bool video, int maxNoFaces)
+    : FaceDetailExtractor(video, maxNoFaces),
       ccal(ccal)
 {
 }
 
-PoseExtractor::PoseExtractor(std::vector<std::string>& args, CameraCalibration ccal, bool video, int maxNoFaces, float threshold)
-    : FaceDetailExtractor(args, video, maxNoFaces, threshold),
+PoseExtractor::PoseExtractor(std::vector<std::string>& args, CameraCalibration ccal, bool video, int maxNoFaces)
+    : FaceDetailExtractor(args, video, maxNoFaces),
       ccal(ccal)
 {
 }
@@ -158,14 +161,14 @@ void PoseExtractor::resetResults()
 // GazeExtractor methods
 // ---------------------
 
-GazeExtractor::GazeExtractor(CameraCalibration ccal, bool video, int maxNoFaces, float threshold)
-    : FaceDetailExtractor(video, maxNoFaces, threshold),
+GazeExtractor::GazeExtractor(CameraCalibration ccal, bool video, int maxNoFaces)
+    : FaceDetailExtractor(video, maxNoFaces),
       ccal(ccal)
 {
 }
 
-GazeExtractor::GazeExtractor(std::vector<std::string>& args, CameraCalibration ccal, bool video, int maxNoFaces, float threshold)
-    : FaceDetailExtractor(args, video, maxNoFaces, threshold),
+GazeExtractor::GazeExtractor(std::vector<std::string>& args, CameraCalibration ccal, bool video, int maxNoFaces)
+    : FaceDetailExtractor(args, video, maxNoFaces),
       ccal(ccal)
 {
 }
@@ -207,4 +210,77 @@ cv::Point3f GazeExtractor::eyeCenter(int person, Eye eye) const
     middle = middle / 8;
 
     return middle;
+}
+
+void GazeExtractor::printResults(std::ostream& os) const
+{
+    for (int person = 0; person < noDetections; person++) {
+        os << " [" 
+           << eyeCenter(person, GazeExtractor::LEFT_EYE) << " " << gazeData[person].direction0 << " "
+           << eyeCenter(person, GazeExtractor::RIGHT_EYE) << " " << gazeData[person].direction1 << " "
+           << gazeData[person].angle
+           << "]";
+    }
+}
+
+
+// -------------------
+// AUExtractor methods
+// -------------------
+
+AUExtractorParameters::AUExtractorParameters(bool videoF)
+{
+    optimize(videoF);
+}
+
+AUExtractorParameters::AUExtractorParameters(std::vector<std::string>& args, bool videoF)
+    : FaceAnalysis::FaceAnalyserParameters(args)
+{
+   optimize(videoF);
+}
+
+void AUExtractorParameters::optimize(bool videoF)
+{
+    if (videoF)
+        OptimizeForVideos();
+    else
+        OptimizeForImages();
+}
+
+AUExtractor::AUExtractor(bool videoF, bool videoL, int maxNoFaces)
+    : FaceDetailExtractor(videoL, maxNoFaces), faceAnalasisParams(videoF), analyser(faceAnalasisParams), videoF(videoF)
+{
+}
+
+AUExtractor::AUExtractor(std::vector<std::string>& args, bool videoF, bool videoL, int maxNoFaces)
+    : FaceDetailExtractor(args, videoL, maxNoFaces), faceAnalasisParams(args, videoF), analyser(faceAnalasisParams), videoF(videoF)
+{
+}
+
+void AUExtractor::saveResults()
+{
+    detectedAU.push_back(analyser.GetCurrentAUsClass());
+}
+
+void AUExtractor::resetResults()
+{
+    detectedAU.clear();
+}
+
+void AUExtractor::processFrame(const Frame& frame, double timestamp, bool success)
+{
+    if (videoF)
+        analyser.AddNextFrame(frame, faceModel.detected_landmarks, success, timestamp);
+    else
+        analyser.PredictStaticAUsAndComputeFeatures(frame, faceModel.detected_landmarks);
+}
+
+void AUExtractor::printResults(std::ostream& os) const
+{
+    for (auto& person : detectedAU) {
+        os << " [";
+        for (auto& au : person)
+            os << au.first << " " << au.second << ", ";
+        os << "]";
+    }
 }

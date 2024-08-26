@@ -2,9 +2,11 @@
 
 #include "videoIO.h"
 #include <iostream>
+#include <memory>
 #include <vector>
 
 #include <LandmarkCoreIncludes.h>
+#include <FaceAnalyser.h>
 
 
 // -------------------
@@ -17,7 +19,9 @@ public:
     virtual ~Extractor() {}
 
     // Returns true if any face has been succesfully detected
-    virtual bool process(const Frame& frame) = 0;
+    virtual bool process(const Frame& frame, double timestamp) = 0;
+
+    virtual void printResults(std::ostream& os) const {}
 };
 
 
@@ -30,9 +34,9 @@ using BoundingBox = cv::Rect_<float>;
 class FaceExtractor : public Extractor
 {
 public:
-    FaceExtractor(int maxNoFaces = 2, float threshold = 0.5);
+    FaceExtractor(int maxNoFaces = 2);
 
-    bool process(const Frame& frame) override;
+    bool process(const Frame& frame, double timestamp = -1) override;
 
     // Processing results
     // Returns no more than (maxNoFaces) results with best confidence, all with confidence above (threshold)
@@ -59,15 +63,17 @@ private:
 class FaceDetailExtractor : public FaceExtractor
 {
 public:
-    FaceDetailExtractor(bool video, int maxNoFaces, float threshold);
-    FaceDetailExtractor(std::vector<std::string>& args, bool video, int maxNoFaces, float threshold);
+    FaceDetailExtractor(bool video, int maxNoFaces);
+    FaceDetailExtractor(std::vector<std::string>& args, bool video, int maxNoFaces);
 
-    virtual bool process(const Frame& frame) override;
+    virtual bool process(const Frame& frame, double timestamp = -1) override;
 
     // Abstract method for extracting data from CLNF face model
     virtual void saveResults() = 0;
     // Abstract method for reseting data containers or variables
     virtual void resetResults() = 0;
+    // Abstract method for video processing (like in AUExtractor)
+    virtual void processFrame(const Frame& frame, double timestamp, bool success) {}
 
     int noDetections = 0;
 
@@ -85,8 +91,8 @@ protected:
 class LandmarkExtractor : public FaceDetailExtractor
 {
 public:
-    LandmarkExtractor(bool video = true, int maxNoFaces = 2, float threshold = 0.5);
-    LandmarkExtractor(std::vector<std::string>& args, bool video = true, int maxNoFaces = 2, float threshold = 0.5);
+    LandmarkExtractor(bool video = true, int maxNoFaces = 2);
+    LandmarkExtractor(std::vector<std::string>& args, bool video = true, int maxNoFaces = 2);
 
     void saveResults() override;
     void resetResults() override;
@@ -104,11 +110,11 @@ public:
 class PoseExtractor : public FaceDetailExtractor
 {
 public:
-    PoseExtractor(CameraCalibration ccal, bool video = true, int maxNoFaces = 2, float threshold = 0.5);
-    PoseExtractor(std::vector<std::string>& args, CameraCalibration ccal, bool video = true, int maxNoFaces = 2, float threshold = 0.5);
+    PoseExtractor(CameraCalibration ccal, bool video = true, int maxNoFaces = 2);
+    PoseExtractor(std::vector<std::string>& args, CameraCalibration ccal, bool video = true, int maxNoFaces = 2);
 
-    virtual void saveResults() override;
-    virtual void resetResults() override;
+    void saveResults() override;
+    void resetResults() override;
 
     std::vector<cv::Vec6d> headPoses;
 
@@ -132,11 +138,13 @@ struct GazeData
 class GazeExtractor : public FaceDetailExtractor
 {
 public:
-    GazeExtractor(CameraCalibration ccal, bool video = true, int maxNoFaces = 2, float threshold = 0.5);
-    GazeExtractor(std::vector<std::string>& args, CameraCalibration ccal, bool video = true, int maxNoFaces = 2, float threshold = 0.5);
+    GazeExtractor(CameraCalibration ccal, bool video = true, int maxNoFaces = 2);
+    GazeExtractor(std::vector<std::string>& args, CameraCalibration ccal, bool video = true, int maxNoFaces = 2);
 
     void saveResults() override;
     void resetResults() override;
+
+    void printResults(std::ostream& os) const override;
 
     // Extracting eye center
     enum Eye {LEFT_EYE = 0, RIGHT_EYE};
@@ -148,4 +156,45 @@ public:
 
 private:
     CameraCalibration ccal;
+};
+
+
+// ------------------------
+// Extractor - action units
+// ------------------------
+
+// Helper defines
+// --------------
+struct AUExtractorParameters : public FaceAnalysis::FaceAnalyserParameters
+{
+    AUExtractorParameters(bool videoF = true);
+    AUExtractorParameters(std::vector<std::string>& args, bool videoF = true);
+
+    void optimize(bool videoF);
+};
+
+using AUList = std::vector<std::vector<std::pair<std::string, double>>>;
+
+// Main class
+// ----------
+class AUExtractor : public FaceDetailExtractor
+{
+public:
+    // videoL stands for using LandmarkDetector in video mode (the one from FaceDetailExtractor)
+    // videoF stands for using FaceAnalyser in video mode (the new one)
+    AUExtractor(bool videoF = true, bool videoL = true, int maxNoFaces = 2);
+    AUExtractor(std::vector<std::string>& args, bool videoF = true, bool videoL = true, int maxNoFaces = 2);
+
+    void saveResults() override;
+    void resetResults() override;
+    void processFrame(const Frame& frame, double timestamp, bool success) override;
+
+    void printResults(std::ostream& os) const override;
+
+    AUList detectedAU;
+
+private:
+    AUExtractorParameters faceAnalasisParams;
+    FaceAnalysis::FaceAnalyser analyser;
+    bool videoF;
 };

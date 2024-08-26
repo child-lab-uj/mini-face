@@ -76,3 +76,8 @@ CameraCalibration VideoIO::getCalibration() const
 {
     return { this->fx, this->fy, this->cx, this->cy };
 }
+
+double VideoIO::getCurrentTimestamp() const
+{
+    return time_stamp;
+}

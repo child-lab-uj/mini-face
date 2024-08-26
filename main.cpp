@@ -22,7 +22,7 @@ int main(int argc, char* argv[])
     // Test API
     // --------
 
-    // // Test mode - video parsing
+    // Test mode - video parsing
     // if constexpr (RUN_VIDEO)
     //     test_video();
     // // Test mode - image parsing
@@ -51,9 +51,10 @@ int main(int argc, char* argv[])
 
         if (arg.compare(0, 5, "video") == 0)
             video = arg.substr(pos + 1);
-        else if (arg.compare(0, 6, "output"))
+        else if (arg.compare(0, 6, "output") == 0) {
             output = arg.substr(pos + 1);
-        else if (arg.compare(0, 6, "frames"))
+        }
+        else if (arg.compare(0, 6, "frames") == 0)
             maxNoFrames = std::stoi(arg.substr(pos + 1));
         // TODO: add camera calibration matrix parsing
     }

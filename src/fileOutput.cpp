@@ -19,7 +19,7 @@ void process_gaze(std::string videoPath, std::string outputFile,
 
     // Initialize extractor
     CameraCalibration activeCcal = ccal == nullptr ? video.getCalibration() : *ccal;
-    GazeExtractor extractor(FaceModelArgs, activeCcal, false, 2, FACE_DETECTION_THRESHOLD);
+    GazeExtractor extractor(FaceModelArgs, activeCcal, false, 2);
 
     // Open output file
     std::ofstream file(outputFile, std::ios::out | std::ios::trunc);
@@ -37,13 +37,7 @@ void process_gaze(std::string videoPath, std::string outputFile,
         if (extractor.process(frame)) {
             // Create and save text representation of data
             file << frameID << ":";
-            for (int person = 0; person < extractor.noDetections; person++) {
-                file << " [" 
-                     << extractor.eyeCenter(person, GazeExtractor::LEFT_EYE) << " " << extractor.gazeData[person].direction0 << " "
-                     << extractor.eyeCenter(person, GazeExtractor::RIGHT_EYE) << " " << extractor.gazeData[person].direction1 << " "
-                     << extractor.gazeData[person].angle
-                     << "]";
-            }
+            extractor.printResults(file);
             file << "\n";
         }
 
