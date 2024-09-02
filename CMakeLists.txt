@@ -5,10 +5,8 @@ project(GazeTracking LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 
 # Path to vcpkg
-# Needs to be set manually
-set(CMAKE_TOOLCHAIN_FILE "C:/Software/vcpkg/scripts/buildsystems/vcpkg.cmake")
-set(CMAKE_PREFIX_PATH "C:/Software/vcpkg/installed/x64-windows")
-
+# set(CMAKE_TOOLCHAIN_FILE "C:/Software/vcpkg/scripts/buildsystems/vcpkg.cmake")
+# set(CMAKE_PREFIX_PATH "C:/Software/vcpkg/installed/x64-windows")
 
 find_package(OpenCV REQUIRED)
 find_package(OpenBLAS REQUIRED)
