@@ -1,5 +1,6 @@
 #include "gaze.h"
-#include "../config.h"
+#include "config.h"
+#include <LandmarkDetectorFunc.h>
 #include <GazeEstimation.h>
 #include <vector>
 

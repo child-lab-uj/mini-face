@@ -1,4 +1,5 @@
-#include "config.h"
+#include "src/config.h"
+#include "src/gaze.h"
 #include <iostream>
 
 // Useful hints
@@ -12,5 +13,6 @@
 
 int main(int argc, char* argv[])
 {
+    std::cout << "Succesfully launched!\n";
     return 0;
 }
