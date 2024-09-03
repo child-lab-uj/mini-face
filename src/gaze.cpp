@@ -2,6 +2,7 @@
 #include "config.h"
 #include <LandmarkDetectorFunc.h>
 #include <GazeEstimation.h>
+#include <sstream>
 #include <vector>
 
 
@@ -12,6 +13,19 @@ namespace {
         "-multi_view", USE_MULTI_VIEW ? "1" : "0"
     };
 
+}
+
+
+// ----------------------
+// Gaze structure methods
+// ----------------------
+
+std::string Gaze::toString() const
+{
+    std::ostringstream stream;
+    stream << "(" << eye1 << ", " << direction1 << ", " << eye2 << ", " << direction2 << ", " << angle << ")";
+
+    return stream.str();
 }
 
 
@@ -42,6 +56,8 @@ void GazeExtractor::estimateCameraCalibration(const Frame& frame)
 
     cx = frame.size().width / 2.0f;
     cy = frame.size().height / 2.0f;
+
+    std::cout << "Camera calibration parameters estimated as: " << fx << ", " << fy << ", " << cx << ", " << cy << "\n";
 }
 
 

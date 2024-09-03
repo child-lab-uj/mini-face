@@ -7,7 +7,7 @@
 // Filepaths
 // ---------
 
-const std::string ROOT_DIRECTORY = "C:/Programowanie/AGH-engeenerka/gaze-tracking";
+const std::string ROOT_DIRECTORY = PROJECT_ROOT;
 const std::string CONFIG_FILEPATH = ROOT_DIRECTORY + "/config.h";
 
 

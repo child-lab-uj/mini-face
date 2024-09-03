@@ -1,18 +1,21 @@
-#include "src/config.h"
 #include "src/gaze.h"
-#include <iostream>
+#include "src/config.h"
+#include <opencv2/opencv.hpp>
 
-// Useful hints
-// ------------
-// 1. Combining DetectLandmarksInImage() with multi_view=true works much better than DetectLandmarksInVideo()
+// Note: this is just a test code. To use it, you need to tell CMake to generate .exe file in CMakeLists.txt
+// The project itself does not generate any executable if not set in CMakeLists, it's just a .pyd or .so python library
 
-
-// -------------
-// Main function
-// -------------
-
-int main(int argc, char* argv[])
+int main()
 {
-    std::cout << "Succesfully launched!\n";
+    Frame image = cv::imread(ROOT_DIRECTORY + "/test_image.jpg");
+    BoundingBox roi(214.467, 96.9926, 110.877, 117.08);
+
+    GazeExtractor extractor;
+    extractor.estimateCameraCalibration(image);
+    auto result = extractor.detectGaze(image, 0, roi);
+
+    if (result.has_value())
+        std::cout << result.value().eye1 << std::endl;
+
     return 0;
 }

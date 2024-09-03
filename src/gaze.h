@@ -22,6 +22,12 @@ struct Gaze
     cv::Point3f eye2;
     cv::Point3f direction2;
     cv::Vec2d angle;
+
+    Gaze() = default;
+    Gaze(cv::Point3f e1, cv::Point3f d1, cv::Point3f e2, cv::Point3f d2, cv::Vec2d a)
+        : eye1(e1), direction1(d1), eye2(e2), direction2(d2), angle(a) {}
+
+    std::string toString() const;
 };
 
 
@@ -40,7 +46,7 @@ public:
     void estimateCameraCalibration(const Frame& frame);
 
     // Gaze detection
-    std::optional<Gaze> detectGaze(const Frame& frame, double timestamp, const BoundingBox& face);
+    std::optional<Gaze> detectGaze(const Frame& frame, double timestamp, const BoundingBox& roi);
 
 private:
     // Helper functions
