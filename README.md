@@ -27,8 +27,7 @@
    setx PATH "%PATH%;C:/Software/vcpkg/installed/x64-windows/bin"
    setx PATH "%PATH%;C:/Software/vcpkg/installed/x64-windows/debug/bin"
    ```
-5. Pobierz zawartość katalogu **/model** z ... (jeszcze nie gotowe)
-6. Pobierz resztę plików modeli (do podkatalogu **/model/patch_experts**) z https://github.com/TadasBaltrusaitis/OpenFace/wiki/Model-download
+5. Pobierz resztę plików modeli (do podkatalogu **/model/patch_experts**) z https://github.com/TadasBaltrusaitis/OpenFace/wiki/Model-download
 
 
 ## Krótki opis struktury projektu:
