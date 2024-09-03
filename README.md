@@ -37,3 +37,26 @@
 - */lib/* - kod źródłowy bibliotek kompilowanych razem z projektem (głównie OpenFace)
 - */dev/* - zasoby (filmy, zdjęcia) i wyniki przetwarzania
 - */src/config.h* - derfinicje ścieżek i stałych parametrów wykonania programu
+
+
+## Użycie w Pythonie
+Poniżej zamieszczam minimalistyczny przykład użycia modułu z poziomu kodu języka Python:
+```
+import sys
+
+sys.path.append('.')
+
+import GazeTracking
+import cv2
+
+if __name__ == "__main__":
+    image = cv2.imread("test_image.jpg")
+    roi = ...          # Calculate face bounding box (Some face detection model call)
+    timestamp = ...    # Timestamp of the frame, for single image we can simply use 0
+
+    extractor = GazeTracking.GazeExtractor()
+    extractor.estimate_camera_calibration(image)
+
+    print(extractor.detect_gaze(image, timestamp, roi))
+```
+W tym przykładzie, powstały z kompilacji plik biblioteki znajduje się w tym samym katalogu co plik z powyższym kodem.
