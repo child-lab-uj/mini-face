@@ -15,7 +15,7 @@
    ```
 3. Zbuduj projekt przy użyciu CMake, podając ścieżkę do menadżera pakietów vcpkg (CMAKE_TOOLCHAIN_FILE). 
    Opcjonalnie, w przypadku problemów z wykryciem bibliotek, można podać ścieżkę do miejsca ich instalacji (CMAKE_PREFIX_PATH). 
-   *Uwaga*: istotna jest zgodność wersji interpretera Pythona używanego podczas budowania modułu z tą wykorzystywaną podczas
+   **Uwaga**: istotna jest zgodność wersji interpretera Pythona używanego podczas budowania modułu z tą wykorzystywaną podczas
    wykonywania programu. Aby zapewnić użycie danej wersji podczas budowania, można ustawić ścieżkę do interpretera (Python_EXECUTABLE).
    Przykładowo, budowanie dla VS (Windows):
    ```
