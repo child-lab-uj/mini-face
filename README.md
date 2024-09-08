@@ -25,7 +25,7 @@
       -DPython_EXECUTABLE=C:/Users/PREDATOR/AppData/Local/Programs/Python/Python312/python.exe
       ..
    ```
-4. Skompiluj rozwiązanie (Uwaga: zalecany tryb Release) wybranym przez siebie narzędziem.
+4. Skompiluj rozwiązanie (**Uwaga**: zalecany tryb Release) wybranym przez siebie narzędziem.
 5. Dodaj pliki .dll używanych bibliotek do katalogu z plikiem wykonywalnym.
    Opcjonalnie można dodać ścieżkę do katalogu z plikami wykonywalnymi menadżera vcpkg do zmiennej systemowej PATH. Przykładowo, dla systemu Windows:
    ```
