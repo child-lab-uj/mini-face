@@ -21,6 +21,12 @@ find_package(dlib REQUIRED)
 find_package(Python COMPONENTS Interpreter Development)
 find_package(pybind11 REQUIRED)
 
+if (Python_FOUND)
+    message(STATUS "Found Python executable: ${Python_EXECUTABLE}")
+    message(STATUS "Found Python include directories: ${Python_INCLUDE_DIRS}")
+    message(STATUS "Found Python libraries: ${Python_LIBRARIES}")
+endif()
+
 # Include files
 set(INCLUDE_DIRS
     ${CMAKE_SOURCE_DIR}/src
