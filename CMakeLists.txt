@@ -45,4 +45,4 @@ file(GLOB_RECURSE API_SRC "${CMAKE_SOURCE_DIR}/src/*.cpp")
 # And this one if for creating python module
 pybind11_add_module(GazeTracking ${OPEN_FACE_SRC} ${API_SRC})
 
-target_link_libraries(GazeTracking PRIVATE ${OpenCV_LIBS} dlib::dlib ${OpenBLAS_LIBRARIES})
+target_link_libraries(GazeTracking PRIVATE ${OpenCV_LIBS} dlib::dlib OpenBLAS::OpenBLAS)
