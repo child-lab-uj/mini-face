@@ -14,14 +14,18 @@
    ./vcpkg install opencv dlib pybind11
    ```
 3. Zbuduj projekt przy użyciu CMake, podając ścieżkę do menadżera pakietów vcpkg (CMAKE_TOOLCHAIN_FILE). 
-   Opcjonalnie, w przypadku problemów z wykryciem bibliotek, można podać ścieżkę do miejsca ich instalacji (CMAKE_PREFIX_PATH). Przykładowo, budowanie dla VS (Windows):
+   Opcjonalnie, w przypadku problemów z wykryciem bibliotek, można podać ścieżkę do miejsca ich instalacji (CMAKE_PREFIX_PATH). 
+   **Uwaga**: istotna jest zgodność wersji interpretera Pythona używanego podczas budowania modułu z tą wykorzystywaną podczas
+   wykonywania programu. Aby zapewnić użycie danej wersji podczas budowania, można ustawić ścieżkę do interpretera (Python_EXECUTABLE).
+   Przykładowo, budowanie dla VS (Windows):
    ```
    cmake -G "Visual Studio 17 2022" ^
       -DCMAKE_PREFIX_PATH="C:/Software/vcpkg/installed/x64-windows" ^
       -DCMAKE_TOOLCHAIN_FILE="C:/Software/vcpkg/scripts/buildsystems/vcpkg.cmake" ^
+      -DPython_EXECUTABLE=C:/Users/PREDATOR/AppData/Local/Programs/Python/Python312/python.exe
       ..
    ```
-4. Skompiluj rozwiązanie (Uwaga: zalecany tryb Release) wybranym przez siebie narzędziem.
+4. Skompiluj rozwiązanie (**Uwaga**: zalecany tryb Release) wybranym przez siebie narzędziem.
 5. Dodaj pliki .dll używanych bibliotek do katalogu z plikiem wykonywalnym.
    Opcjonalnie można dodać ścieżkę do katalogu z plikami wykonywalnymi menadżera vcpkg do zmiennej systemowej PATH. Przykładowo, dla systemu Windows:
    ```

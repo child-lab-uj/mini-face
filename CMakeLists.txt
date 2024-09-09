@@ -21,6 +21,12 @@ find_package(dlib REQUIRED)
 find_package(Python COMPONENTS Interpreter Development)
 find_package(pybind11 REQUIRED)
 
+if (Python_FOUND)
+    message(STATUS "Found Python executable: ${Python_EXECUTABLE}")
+    message(STATUS "Found Python include directories: ${Python_INCLUDE_DIRS}")
+    message(STATUS "Found Python libraries: ${Python_LIBRARIES}")
+endif()
+
 # Include files
 set(INCLUDE_DIRS
     ${CMAKE_SOURCE_DIR}/src
@@ -39,4 +45,4 @@ file(GLOB_RECURSE API_SRC "${CMAKE_SOURCE_DIR}/src/*.cpp")
 # And this one if for creating python module
 pybind11_add_module(GazeTracking ${OPEN_FACE_SRC} ${API_SRC})
 
-target_link_libraries(GazeTracking PRIVATE ${OpenCV_LIBS} dlib::dlib ${OpenBLAS_LIBRARIES})
+target_link_libraries(GazeTracking PRIVATE ${OpenCV_LIBS} dlib::dlib OpenBLAS::OpenBLAS)
