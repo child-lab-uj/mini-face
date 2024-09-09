@@ -1,0 +1,5 @@
+{
+  "name": "mini-face",
+  "version": "0.0.1",
+  "dependencies": ["openblas", "opencv", "dlib", "pybind11"]
+}

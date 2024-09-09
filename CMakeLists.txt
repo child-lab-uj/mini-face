@@ -39,8 +39,8 @@ include_directories(${OpenCV_INCLUDE_DIRS} ${dlib_INCLUDE_DIRS} ${OpenBLAS_INCLU
 file(GLOB_RECURSE OPEN_FACE_SRC "${CMAKE_SOURCE_DIR}/lib/OpenFace/src/*.cpp")
 file(GLOB_RECURSE API_SRC "${CMAKE_SOURCE_DIR}/src/*.cpp")
 
-# This one is for creating an .exe 
-# add_executable(GazeTracking ${OPEN_FACE_SRC} ${API_SRC} main.cpp) 
+# This one is for creating an .exe
+# add_executable(GazeTracking ${OPEN_FACE_SRC} ${API_SRC} main.cpp)
 
 # And this one if for creating python module
 pybind11_add_module(GazeTracking ${OPEN_FACE_SRC} ${API_SRC})
