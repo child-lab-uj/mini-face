@@ -13,8 +13,8 @@
    ```
    ./vcpkg install opencv dlib pybind11
    ```
-3. Zbuduj projekt przy użyciu CMake, podając ścieżkę do menadżera pakietów vcpkg (CMAKE_TOOLCHAIN_FILE). 
-   Opcjonalnie, w przypadku problemów z wykryciem bibliotek, można podać ścieżkę do miejsca ich instalacji (CMAKE_PREFIX_PATH). 
+3. Zbuduj projekt przy użyciu CMake, podając ścieżkę do menadżera pakietów vcpkg (CMAKE_TOOLCHAIN_FILE).
+   Opcjonalnie, w przypadku problemów z wykryciem bibliotek, można podać ścieżkę do miejsca ich instalacji (CMAKE_PREFIX_PATH).
    **Uwaga**: istotna jest zgodność wersji interpretera Pythona używanego podczas budowania modułu z tą wykorzystywaną podczas
    wykonywania programu. Aby zapewnić użycie danej wersji podczas budowania, można ustawić ścieżkę do interpretera (Python_EXECUTABLE).
    Przykładowo, budowanie dla VS (Windows):
@@ -34,6 +34,18 @@
    ```
 6. Pobierz resztę plików modeli (do podkatalogu **/model/patch_experts**) z https://github.com/TadasBaltrusaitis/OpenFace/wiki/Model-download
 
+## Wersja skrócona
+> Wymagania: `cmake`, `vcpkg`, `python 3.12`,
+> zmienna środowiskowa `VCPKG_ROOT`
+```shell
+$ mkdir build
+$ cd build
+$ cmake --preset=default \
+  -DCMAKE_BUILD_TYPE=Release \
+  -DPython_EXECUTABLE=<path-to-python-3.12> \
+  ..
+$ cmake --build .
+```
 
 ## Krótki opis struktury projektu:
 - */src/* - kod źródłowy
