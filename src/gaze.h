@@ -1,6 +1,6 @@
 #pragma once
 
-#include <opencv2/opencv.hpp>
+#include "helpers.h"
 #include <LandmarkDetectorModel.h>
 #include <optional>
 
@@ -8,9 +8,6 @@
 // --------------
 // Helper defines
 // --------------
-
-using Frame = cv::Mat;
-using BoundingBox = cv::Rect_<float>;
 
 enum Eye {LEFT_EYE = 0, RIGHT_EYE};
 

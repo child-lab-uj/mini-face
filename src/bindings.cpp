@@ -1,4 +1,5 @@
 #include "gaze.h"
+#include "actionUnits.h"
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>
 #include <pybind11/stl.h>
@@ -90,5 +91,14 @@ PYBIND11_MODULE(GazeTracking, handle) {
             Frame frameMat = numpy_to_mat(frame);
             BoundingBox bbox = tuple_to_rect(roi);
             return self.detectGaze(frameMat, timestamp, bbox);
+        }, py::arg("frame"), py::arg("timestamp"), py::arg("roi"));
+    
+    // Action unit extractor interface binding
+    py::class_<AUExtractor>(handle, "AUExtractor")
+        .def(py::init<bool>(), py::arg("video"))
+        .def("detect_action_units", [](AUExtractor& self, const py::array_t<uint8_t>& frame, double timestamp, const py::tuple& roi) -> std::vector<std::pair<std::string, double>> {
+            Frame frameMat = numpy_to_mat(frame);
+            BoundingBox bbox = tuple_to_rect(roi);
+            return self.detectActionUnits(frameMat, timestamp, bbox);
         }, py::arg("frame"), py::arg("timestamp"), py::arg("roi"));
 }
