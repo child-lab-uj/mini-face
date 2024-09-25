@@ -1,19 +1,8 @@
 #include "gaze.h"
-#include "config.h"
 #include <LandmarkDetectorFunc.h>
 #include <GazeEstimation.h>
 #include <sstream>
 #include <vector>
-
-
-namespace {
-
-    std::vector<std::string> FaceModelArgs = {
-        CONFIG_FILEPATH, // To extract root directory
-        "-multi_view", USE_MULTI_VIEW ? "1" : "0"
-    };
-
-}
 
 
 // ----------------------
@@ -33,8 +22,10 @@ std::string Gaze::toString() const
 // GazeExtractor methods - setup
 // -----------------------------
 
-GazeExtractor::GazeExtractor()
-    : params(FaceModelArgs), model(params.model_location)
+GazeExtractor::GazeExtractor(bool videoMode, 
+                             std::optional<bool> wild, std::optional<bool> multi_view, std::optional<bool> limit_pose,
+                             std::optional<int> n_iter, std::optional<float> reg_factor, std::optional<float> weight_factor)
+    : LandmarkExtractor(videoMode, wild, multi_view, limit_pose, n_iter, reg_factor, weight_factor)
 {
 }
 
@@ -67,25 +58,26 @@ void GazeExtractor::estimateCameraCalibration(const Frame& frame)
 
 std::optional<Gaze> GazeExtractor::detectGaze(const Frame& frame, double timestamp, const BoundingBox& face)
 {
-    Frame empty;
     Gaze gaze;
 
     // Detect landmarks
-    bool result = USE_IMAGE_MODE ? LandmarkDetector::DetectLandmarksInImage(frame, face, model, params, empty) :
-                                   LandmarkDetector::DetectLandmarksInVideo(frame, face, model, params, empty);
+    bool result = detectFaceLandmarks(frame, timestamp, face);
     if (!result)
         return std::nullopt;
     
+    if (fx < 0)
+        estimateCameraCalibration(frame);
+    
     // Calculate eye landmarks in 3D space
-    std::vector<cv::Point3f> eyeLandmarks3D = LandmarkDetector::Calculate3DEyeLandmarks(model, fx, fy, cx, cy);
+    std::vector<cv::Point3f> eyeLandmarks3D = LandmarkDetector::Calculate3DEyeLandmarks(*model, fx, fy, cx, cy);
 
     // Calculate eye center based on the eye landmarks
     gaze.eye1 = calculateEyeCenter(eyeLandmarks3D, LEFT_EYE);
     gaze.eye2 = calculateEyeCenter(eyeLandmarks3D, RIGHT_EYE);
 
     // Calculate gaze direction
-    GazeAnalysis::EstimateGaze(model, gaze.direction1, fx, fy, cx, cy, true);
-    GazeAnalysis::EstimateGaze(model, gaze.direction2, fx, fy, cx, cy, false);
+    GazeAnalysis::EstimateGaze(*model, gaze.direction1, fx, fy, cx, cy, true);
+    GazeAnalysis::EstimateGaze(*model, gaze.direction2, fx, fy, cx, cy, false);
     gaze.angle = GazeAnalysis::GetGazeAngle(gaze.direction1, gaze.direction2);
 
     return std::make_optional(gaze);

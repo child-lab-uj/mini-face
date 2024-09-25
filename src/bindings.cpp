@@ -80,7 +80,19 @@ PYBIND11_MODULE(GazeTracking, handle) {
 
     // Gaze extractor interface binding
     py::class_<GazeExtractor>(handle, "GazeExtractor")
-        .def(py::init<>())
+        .def(py::init<bool, std::optional<bool>, std::optional<bool>, std::optional<bool>,
+                      std::optional<int>, std::optional<float>, std::optional<float>>(),
+             py::arg("ld_video_mode") = false, py::arg("wild") = std::nullopt, py::arg("multi_view") = std::make_optional(true),
+             py::arg("limit_pose") = std::nullopt, py::arg("n_iter") = std::nullopt,
+             py::arg("reg_factor") = std::nullopt, py::arg("weight_factor") = std::nullopt,
+             "Constructor for GazeExtractor.\n\n"
+             ":param ld_video_mode: decides to use DetectLandmarksInVideo() or DetectLandmarksInImage() function.\n"
+             ":param wild: a specyfic set of parameters for tough conditions (various lighting, incomplete view of the face).\n"
+             ":param multi_view: (Recommended) decides whether to consider multiple views during model reinit.\n"
+             ":param limit_pose: should pose be limited to 180 degrees frontal.\n"
+             ":param n_iter: number of optimization iterations.\n"
+             ":param reg_factor: regularization parameter.\n"
+             ":param weight_factor: refers to how much weight is applied to certain constraints during the optimization process.")
         .def("set_camera_calibration", &GazeExtractor::setCameraCalibration,
              py::arg("fx"), py::arg("fy"), py::arg("cx"), py::arg("cy"))
         .def("estimate_camera_calibration", [](GazeExtractor& self, const py::array_t<uint8_t>& frame) -> void {
@@ -95,7 +107,21 @@ PYBIND11_MODULE(GazeTracking, handle) {
     
     // Action unit extractor interface binding
     py::class_<AUExtractor>(handle, "AUExtractor")
-        .def(py::init<bool>(), py::arg("video"))
+        .def(py::init<bool, bool, std::optional<bool>, std::optional<bool>, std::optional<bool>,
+                      std::optional<int>, std::optional<float>, std::optional<float>>(),
+             py::arg("ld_video_mode") = false, py::arg("fa_video_mode") = false,
+             py::arg("wild") = std::nullopt, py::arg("multi_view") = std::make_optional(true),
+             py::arg("limit_pose") = std::nullopt, py::arg("n_iter") = std::nullopt,
+             py::arg("reg_factor") = std::nullopt, py::arg("weight_factor") = std::nullopt,
+             "Constructor for AUExtractor.\n\n"
+             ":param ld_video_mode: decides to use DetectLandmarksInVideo() or DetectLandmarksInImage() function.\n"
+             ":param fa_video_mode: decides to use AddNextFrame() or PredictStaticAUsAndComputeFeatures() function.\n"
+             ":param wild: a specyfic set of parameters for tough conditions (various lighting, incomplete view of the face).\n"
+             ":param multi_view: (Recommended) decides whether to consider multiple views during model reinit.\n"
+             ":param limit_pose: should pose be limited to 180 degrees frontal.\n"
+             ":param n_iter: number of optimization iterations.\n"
+             ":param reg_factor: regularization parameter.\n"
+             ":param weight_factor: refers to how much weight is applied to certain constraints during the optimization process.")
         .def("detect_action_units", [](AUExtractor& self, const py::array_t<uint8_t>& frame, double timestamp, const py::tuple& roi) -> std::vector<std::pair<std::string, double>> {
             Frame frameMat = numpy_to_mat(frame);
             BoundingBox bbox = tuple_to_rect(roi);

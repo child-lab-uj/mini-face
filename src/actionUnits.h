@@ -1,41 +1,44 @@
 #pragma once
 
-#include "helpers.h"
-#include <LandmarkDetectorModel.h>
+#include "landmarks.h"
 #include <FaceAnalyser.h>
 #include <vector>
-
-
-// --------------
-// Helper defines
-// --------------
-
-struct FaceAnalyserParameters : public FaceAnalysis::FaceAnalyserParameters
-{
-    FaceAnalyserParameters(std::vector<std::string>& args, bool videoF = true)
-        : FaceAnalysis::FaceAnalyserParameters(args) { if (videoF) OptimizeForVideos(); else OptimizeForImages(); }
-};
 
 
 // -----------------
 // AUExtractor class
 // -----------------
 
-class AUExtractor
+class AUExtractor : public LandmarkExtractor
 {
 public:
-    AUExtractor(bool video);
+    /* 
+        Brief description of parameters:
+        - landmarkVideoMode: decides to use DetectLandmarksInVideo() or DetectLandmarksInImage() function.
+                             I noticed from a practice that videoMode = false gives better results (combined with multi_view).
+        - auVideoMode: decides to use AddNextFrame() or PredictStaticAUsAndComputeFeatures() function.
+                       AddNextFrame() is more suitable for videos, as it provides some sort of memory.
+        - wild: a specyfic set of parameters for tough conditions (various lighting, incomplete view of the face)
+        - multi_view: decides whether to consider multiple views during model reinit.
+                      It significantly improves the results when combined with DetectLandmarksInImage()
+        - limit_pose: should pose be limited to 180 degrees frontal.
+        - n_iter: number of optimization iterations.
+        - reg_factor: regularization parameter.
+        - weight_factor: refers to how much weight is applied to certain constraints during the optimization process.
+    */
+    AUExtractor(bool landmarkVideoMode, bool auVideoMode,
+                std::optional<bool> wild, std::optional<bool> multi_view, std::optional<bool> limit_pose,
+                std::optional<int> n_iter, std::optional<float> reg_factor, std::optional<float> weight_factor);
 
     // Main API method
     std::vector<std::pair<std::string, double>> detectActionUnits(const Frame& frame, double timestamp, const BoundingBox& roi);
 
 private:
-    // Face landmark detection model
-    LandmarkDetector::FaceModelParameters paramsLD;
-    LandmarkDetector::CLNF modelLD;
+    // Face analyser parameters
+    bool faceAnalyserVideoMode;
+    std::vector<std::string> faceAnalyserArgList;
+    std::unique_ptr<FaceAnalysis::FaceAnalyserParameters> faceAnalyserParams;
 
     // Face analyser model
-    FaceAnalyserParameters paramsFA;
-    FaceAnalysis::FaceAnalyser modelFA;
-    bool video;
+    std::unique_ptr<FaceAnalysis::FaceAnalyser> faceAnalyserModel;
 };

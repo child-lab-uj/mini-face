@@ -1,5 +1,4 @@
 #include "src/gaze.h"
-#include "src/config.h"
 #include <opencv2/opencv.hpp>
 
 // Note: this is just a test code. To use it, you need to tell CMake to generate .exe file in CMakeLists.txt

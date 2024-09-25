@@ -1,8 +1,7 @@
 #pragma once
 
-#include "helpers.h"
-#include <LandmarkDetectorModel.h>
-#include <optional>
+#include "landmarks.h"
+#include <vector>
 
 
 // --------------
@@ -33,10 +32,24 @@ struct Gaze
 // -------------------
 
 // This is the main API class
-class GazeExtractor
+class GazeExtractor : public LandmarkExtractor
 {
 public:
-    GazeExtractor();
+    /* 
+        Brief description of parameters:
+        - videoMode: decides to use DetectLandmarksInVideo() or DetectLandmarksInImage() function.
+                     I noticed from a practice that videoMode = false gives better results (combined with multi_view).
+        - wild: a specyfic set of parameters for tough conditions (various lighting, incomplete view of the face)
+        - multi_view: decides whether to consider multiple views during model reinit.
+                      It significantly improves the results when combined with DetectLandmarksInImage()
+        - limit_pose: should pose be limited to 180 degrees frontal.
+        - n_iter: number of optimization iterations.
+        - reg_factor: regularization parameter.
+        - weight_factor: refers to how much weight is applied to certain constraints during the optimization process.
+    */
+    GazeExtractor(bool videoMode, 
+                  std::optional<bool> wild, std::optional<bool> multi_view, std::optional<bool> limit_pose,
+                  std::optional<int> n_iter, std::optional<float> reg_factor, std::optional<float> weight_factor);
     
     // Setting the parameters
     void setCameraCalibration(float fx, float fy, float cx, float cy);
@@ -51,8 +64,4 @@ private:
 
     // Camera parameters
     float fx = -1, fy = -1, cx = -1, cy = -1;
-
-    // Face landmark detection model
-    LandmarkDetector::FaceModelParameters params;
-    LandmarkDetector::CLNF model;
 };
