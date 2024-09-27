@@ -4,6 +4,9 @@
 #include <pybind11/numpy.h>
 #include <pybind11/stl.h>
 
+#define STRINGIFY(x) #x
+#define MACRO_STRINGIFY(x) STRINGIFY(x)
+
 
 // -----------------------
 // Python type conversions
@@ -53,9 +56,15 @@ cv::Rect_<float> tuple_to_rect(const py::tuple& t)
 // Python bindings
 // ---------------
 
-PYBIND11_MODULE(GazeTracking, handle) {
+PYBIND11_MODULE(_python_api, handle) {
     // TODO: add some more docs about API functions
-    handle.doc() = "A gaze tracking module to interact with images or video frames.";
+    handle.doc() = R"pbdoc(
+        A minimalist Python wrapper for OpenFace library.
+
+        Two main API classes:
+        - GazeExtractor - for gaze tracking
+        - AUExtractor - for action unit detection
+    )pbdoc";
 
     // Gaze structure binding
     py::class_<Gaze>(handle, "Gaze")
@@ -127,4 +136,10 @@ PYBIND11_MODULE(GazeTracking, handle) {
             BoundingBox bbox = tuple_to_rect(roi);
             return self.detectActionUnits(frameMat, timestamp, bbox);
         }, py::arg("frame"), py::arg("timestamp"), py::arg("roi"));
+
+    #ifdef VERSION_INFO
+        handle.attr("__version__") = MACRO_STRINGIFY(VERSION_INFO);
+    #else
+        handle.attr("__version__") = "dev";
+    #endif
 }

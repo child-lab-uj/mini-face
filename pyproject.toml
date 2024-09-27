@@ -1,0 +1,34 @@
+[build-system]
+requires = [
+    "setuptools>=42",
+    "wheel",
+    "scikit-build>=0.13",
+    "ninja",
+    "pybind11",
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+# https://setuptools.pypa.io/en/latest/userguide/pyproject_config.html
+# https://peps.python.org/pep-0621/
+name = "mini-face"
+authors = [{ name = "Igor Swat", email = "iswat@student.agh.edu.pl" }]
+description = "A minimalist Python wrapper for OpenFace library"
+readme = "README.md"
+license = { text = "BSD 3-Clause License" }
+requires-python = ">=3.12"
+keywords = ["OpenFace", "vcpkg", "pybind11", "scikit-build", "cpp"]
+dynamic = ["version"]
+
+[project.urls]
+repository = "https://github.com/child-lab-uj/gaze-tracking"
+
+[project.optional-dependencies]
+# When adding `[test]` to your `pip install` command you can install the extra
+# dependencies associated with testing. Example `pip install .[test]`
+# https://setuptools.pypa.io/en/latest/userguide/dependency_management.html#optional-dependencies
+test = ["pytest"]
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+testpaths = ["tests"]

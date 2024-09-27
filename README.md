@@ -58,21 +58,18 @@ $ cmake --build .
 ## Użycie w Pythonie
 Poniżej zamieszczam minimalistyczny przykład użycia modułu z poziomu kodu języka Python:
 ```
-import sys
+import mini_face
 
-sys.path.append('.')
-
-import GazeTracking
 import cv2
+import mini_face._python_api
 
 if __name__ == "__main__":
     image = cv2.imread("test_image.jpg")
-    roi = ...          # Calculate face bounding box (Some face detection model call)
-    timestamp = ...    # Timestamp of the frame, for single image we can simply use 0
+    roi = (214.467, 96.9926, 110.877, 117.08)
 
-    extractor = GazeTracking.GazeExtractor()
+    extractor = mini_face._python_api.GazeExtractor()
     extractor.estimate_camera_calibration(image)
 
-    print(extractor.detect_gaze(image, timestamp, roi))
+    print(extractor.detect_gaze(image, 0, roi))
 ```
 W tym przykładzie, powstały z kompilacji plik biblioteki znajduje się w tym samym katalogu co plik z powyższym kodem.
