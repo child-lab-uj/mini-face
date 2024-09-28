@@ -1,1 +1,1 @@
-from ._gaze import Extractor, Mode, Result
+from ._gaze import Extractor, Result
