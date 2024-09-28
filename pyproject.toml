@@ -9,16 +9,19 @@ requires = [
 build-backend = "setuptools.build_meta"
 
 [project]
-# https://setuptools.pypa.io/en/latest/userguide/pyproject_config.html
-# https://peps.python.org/pep-0621/
 name = "mini-face"
-authors = [{ name = "Igor Swat", email = "iswat@student.agh.edu.pl" }]
+authors = [
+    { name = "Igor Swat", email = "iswat@student.agh.edu.pl" },
+    { name = "Jan Smółka", email = "jp.smolka@gmail.com" },
+]
 description = "A minimalist Python wrapper for OpenFace library"
 readme = "README.md"
 license = { text = "BSD 3-Clause License" }
 requires-python = ">=3.12"
 keywords = ["OpenFace", "vcpkg", "pybind11", "scikit-build", "cpp"]
 dynamic = ["version"]
+
+dependencies = ["numpy>=1.21"]
 
 [project.urls]
 repository = "https://github.com/child-lab-uj/mini-face"
