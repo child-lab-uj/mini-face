@@ -6,11 +6,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from ..api import AUExtractor  # type: ignore
-
-
-class Mode(Enum):
-    IMAGE = auto()
-    VIDEO = auto()
+from ..common import PredictionMode
 
 
 @dataclass(frozen=True)
@@ -49,8 +45,8 @@ def convert(au_label: str) -> int:
 
 
 class Extractor:
-    landmark_mode: Mode
-    au_mode: Mode
+    landmark_mode: PredictionMode
+    au_mode: PredictionMode
     wild: bool
     multiple_views: bool
     limit_angles: bool
@@ -69,8 +65,8 @@ class Extractor:
     def __init__(
             self,
             *,
-            landmark_mode: Mode,
-            au_mode: Mode,
+            landmark_mode: PredictionMode,
+            au_mode: PredictionMode,
             fps: int = 60,
             wild: bool = False,
             models_directory: str,

@@ -6,11 +6,7 @@ from pathlib import Path
 import numpy as np
 
 from ..api import GazeExtractor  # type: ignore
-
-
-class Mode(Enum):
-    IMAGE = auto()
-    VIDEO = auto()
+from ..common import PredictionMode
 
 
 @dataclass(frozen=True)
@@ -32,7 +28,7 @@ __EMPTY_ENTRY = ((0.0, 0.0, 0.0), (0.0, 0.0, 0.0))
 
 
 class Extractor:
-    mode: Mode
+    mode: PredictionMode
     wild: bool
     multiple_views: bool
     limit_angles: bool
@@ -55,7 +51,7 @@ class Extractor:
     def __init__(
             self,
             *,
-            mode: Mode,
+            mode: PredictionMode,
             focal_length: tuple[float, float],
             optical_center: tuple[float, float],
             models_directory: Path,
