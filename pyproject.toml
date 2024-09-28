@@ -21,14 +21,4 @@ keywords = ["OpenFace", "vcpkg", "pybind11", "scikit-build", "cpp"]
 dynamic = ["version"]
 
 [project.urls]
-repository = "https://github.com/child-lab-uj/gaze-tracking"
-
-[project.optional-dependencies]
-# When adding `[test]` to your `pip install` command you can install the extra
-# dependencies associated with testing. Example `pip install .[test]`
-# https://setuptools.pypa.io/en/latest/userguide/dependency_management.html#optional-dependencies
-test = ["pytest"]
-
-[tool.pytest.ini_options]
-minversion = "6.0"
-testpaths = ["tests"]
+repository = "https://github.com/child-lab-uj/mini-face"

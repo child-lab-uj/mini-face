@@ -78,4 +78,10 @@ setup(
     cmake_with_sdist=True,
     # Signal cmake to use `vcpkg`
     cmake_args=["-DBUILD_TESTS=OFF"],
+    # Add additional data
+    include_package_data=True,
+    package_data={
+        '': ['vcpkg.json'],
+        'mini_face': ['model/*', 'AU_predictors/*'],
+    },
 )

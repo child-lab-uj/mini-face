@@ -56,7 +56,7 @@ cv::Rect_<float> tuple_to_rect(const py::tuple& t)
 // Python bindings
 // ---------------
 
-PYBIND11_MODULE(_python_api, handle) {
+PYBIND11_MODULE(api, handle) {
     // TODO: add some more docs about API functions
     handle.doc() = R"pbdoc(
         A minimalist Python wrapper for OpenFace library.

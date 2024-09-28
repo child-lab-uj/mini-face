@@ -93,14 +93,14 @@ if(DEFINED SKBUILD)
     # call pybind11-config to obtain the root of the cmake package
     execute_process(COMMAND ${PYTHON_EXECUTABLE} -m pybind11 --cmakedir
         OUTPUT_VARIABLE pybind11_ROOT_RAW)
-    string(STRIP ${pybind11_ROOT_RAW} pybind11_ROOT)
+    string(STRIP "${pybind11_ROOT_RAW}" pybind11_ROOT)
     find_package(pybind11 CONFIG REQUIRED)
 
     # Take into account that this name should be consistent with the contents
     # of the `__init__.py` file and when calling PYBIND11_MODULE() in the
     # python API code. This could be avoided with some code generation but it
     # would be too complicated for this simple example.
-    set(PROJECT_PYTHON_API_NAME _python_api)
+    set(PROJECT_PYTHON_API_NAME api)
 
     # This function behaves very much like CMake’s builtin `add_library`
     pybind11_add_module(${PROJECT_PYTHON_API_NAME}
