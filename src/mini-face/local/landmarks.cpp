@@ -2,13 +2,13 @@
 #include <LandmarkDetectorFunc.h>
 
 
-LandmarkExtractor::LandmarkExtractor(bool videoMode, 
+LandmarkExtractor::LandmarkExtractor(std::string model_loc, bool videoMode, 
                                      std::optional<bool> wild, std::optional<bool> multi_view, std::optional<bool> limit_pose,
                                      std::optional<int> n_iter, std::optional<float> reg_factor, std::optional<float> weight_factor)
     : useVideoMode(videoMode)
 {
-    // Add root directory arg
-    argList.push_back(MAIN_FILEPATH);
+    // OpenFace will extract parent directory of model_loc and mark it as root
+    argList.push_back(model_loc);
 
     // Add wild parameter
     if (wild.has_value())

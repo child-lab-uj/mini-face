@@ -144,3 +144,7 @@ cython_debug/
 
 # OpenFace subdirectories
 classifiers
+
+# Test resource
+test.py
+test_image.jpg

@@ -89,8 +89,9 @@ PYBIND11_MODULE(api, handle) {
 
     // Gaze extractor interface binding
     py::class_<GazeExtractor>(handle, "GazeExtractor")
-        .def(py::init<bool, std::optional<bool>, std::optional<bool>, std::optional<bool>,
-                      std::optional<int>, std::optional<float>, std::optional<float>>(),
+        .def(py::init<std::string, bool, std::optional<bool>, std::optional<bool>, std::optional<bool>,
+                                         std::optional<int>, std::optional<float>, std::optional<float>>(),
+             py::arg("model_loc"),
              py::arg("ld_video_mode") = false, py::arg("wild") = std::nullopt, py::arg("multi_view") = std::make_optional(true),
              py::arg("limit_pose") = std::nullopt, py::arg("n_iter") = std::nullopt,
              py::arg("reg_factor") = std::nullopt, py::arg("weight_factor") = std::nullopt,
@@ -104,10 +105,6 @@ PYBIND11_MODULE(api, handle) {
              ":param weight_factor: refers to how much weight is applied to certain constraints during the optimization process.")
         .def("set_camera_calibration", &GazeExtractor::setCameraCalibration,
              py::arg("fx"), py::arg("fy"), py::arg("cx"), py::arg("cy"))
-        .def("estimate_camera_calibration", [](GazeExtractor& self, const py::array_t<uint8_t>& frame) -> void {
-            cv::Mat frameMat = numpy_to_mat(frame);
-            self.estimateCameraCalibration(frameMat);
-        }, py::arg("frame"))
         .def("detect_gaze", [](GazeExtractor& self, const py::array_t<uint8_t>& frame, double timestamp, const py::tuple& roi) -> std::optional<Gaze> {
             Frame frameMat = numpy_to_mat(frame);
             BoundingBox bbox = tuple_to_rect(roi);
@@ -116,8 +113,9 @@ PYBIND11_MODULE(api, handle) {
     
     // Action unit extractor interface binding
     py::class_<AUExtractor>(handle, "AUExtractor")
-        .def(py::init<bool, bool, std::optional<bool>, std::optional<bool>, std::optional<bool>,
-                      std::optional<int>, std::optional<float>, std::optional<float>>(),
+        .def(py::init<std::string, bool, bool, std::optional<bool>, std::optional<bool>, std::optional<bool>,
+                                               std::optional<int>, std::optional<float>, std::optional<float>>(),
+             py::arg("model_loc"),
              py::arg("ld_video_mode") = false, py::arg("fa_video_mode") = false,
              py::arg("wild") = std::nullopt, py::arg("multi_view") = std::make_optional(true),
              py::arg("limit_pose") = std::nullopt, py::arg("n_iter") = std::nullopt,
@@ -131,10 +129,15 @@ PYBIND11_MODULE(api, handle) {
              ":param n_iter: number of optimization iterations.\n"
              ":param reg_factor: regularization parameter.\n"
              ":param weight_factor: refers to how much weight is applied to certain constraints during the optimization process.")
-        .def("detect_action_units", [](AUExtractor& self, const py::array_t<uint8_t>& frame, double timestamp, const py::tuple& roi) -> std::vector<std::pair<std::string, double>> {
+        .def("detect_au_presence", [](AUExtractor& self, const py::array_t<uint8_t>& frame, double timestamp, const py::tuple& roi) -> std::vector<std::pair<std::string, double>> {
             Frame frameMat = numpy_to_mat(frame);
             BoundingBox bbox = tuple_to_rect(roi);
-            return self.detectActionUnits(frameMat, timestamp, bbox);
+            return self.detectActionUnitPresence(frameMat, timestamp, bbox);
+        }, py::arg("frame"), py::arg("timestamp"), py::arg("roi"))
+        .def("detect_au_intensity", [](AUExtractor& self, const py::array_t<uint8_t>& frame, double timestamp, const py::tuple& roi) -> std::vector<std::pair<std::string, double>> {
+            Frame frameMat = numpy_to_mat(frame);
+            BoundingBox bbox = tuple_to_rect(roi);
+            return self.detectActionUnitIntensity(frameMat, timestamp, bbox);
         }, py::arg("frame"), py::arg("timestamp"), py::arg("roi"));
 
     #ifdef VERSION_INFO

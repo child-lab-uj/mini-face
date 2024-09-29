@@ -22,7 +22,7 @@ Below is a minimalist example of using the module from Python code:
    if __name__ == "__main__":
       image = cv2.imread("test_image.jpg")
       extractor = Extractor(
-        mode=PredictionMode.VIDEO,
+        mode=PredictionMode.IMAGE,
         focal_length=(500, 500),
         optical_center=(860.0, 540.0),
         models_directory="./model",
