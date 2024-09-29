@@ -1,7 +1,7 @@
 # Mini-face
 
 ## Installation with pip
-> Requirements: `python 3.12`.
+> Requirements: `python 3.12`, `numpy >= 1.21`.
 1. Install the package with a following command:
 ```
    python3 -m pip install mini-face
