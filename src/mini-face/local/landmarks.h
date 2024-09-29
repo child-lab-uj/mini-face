@@ -4,6 +4,7 @@
 #include <LandmarkDetectorModel.h>
 #include <memory>
 #include <optional>
+#include <string>
 
 
 // ---------------------------
@@ -13,7 +14,7 @@
 class LandmarkExtractor
 {
 public:
-    LandmarkExtractor(bool videoMode, 
+    LandmarkExtractor(std::string model_loc, bool videoMode, 
                       std::optional<bool> wild, std::optional<bool> multi_view, std::optional<bool> limit_pose,
                       std::optional<int> n_iter, std::optional<float> reg_factor, std::optional<float> weight_factor);
     virtual ~LandmarkExtractor() = default;

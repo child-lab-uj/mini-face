@@ -82,6 +82,5 @@ setup(
     include_package_data=True,
     package_data={
         '': ['vcpkg.json'],
-        'mini_face': ['model/*', 'AU_predictors/*'],
     },
 )

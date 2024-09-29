@@ -47,13 +47,13 @@ public:
         - reg_factor: regularization parameter.
         - weight_factor: refers to how much weight is applied to certain constraints during the optimization process.
     */
-    GazeExtractor(bool videoMode, 
+    GazeExtractor(std::string model_loc, bool videoMode, 
                   std::optional<bool> wild, std::optional<bool> multi_view, std::optional<bool> limit_pose,
                   std::optional<int> n_iter, std::optional<float> reg_factor, std::optional<float> weight_factor);
     
     // Setting the parameters
+    // I decided to keep this method to allow one extractor read frames from multiple cameras
     void setCameraCalibration(float fx, float fy, float cx, float cy);
-    void estimateCameraCalibration(const Frame& frame);
 
     // Gaze detection
     std::optional<Gaze> detectGaze(const Frame& frame, double timestamp, const BoundingBox& roi);

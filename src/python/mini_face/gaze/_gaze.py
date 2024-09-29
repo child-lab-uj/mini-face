@@ -103,14 +103,14 @@ class Extractor:
         self.cy = cy
 
         model = GazeExtractor(
+            models_directory,
             mode == PredictionMode.VIDEO,
             wild,
             multiple_views,
             limit_angles,
             optimization_iterations,
             regularization_factor,
-            weight_factor,
-            models_directory,
+            weight_factor
         )
 
         model.set_camera_calibration(fx, fy, cx, cy)

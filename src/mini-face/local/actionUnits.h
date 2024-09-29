@@ -26,14 +26,17 @@ public:
         - reg_factor: regularization parameter.
         - weight_factor: refers to how much weight is applied to certain constraints during the optimization process.
     */
-    AUExtractor(bool landmarkVideoMode, bool auVideoMode,
+    AUExtractor(std::string model_loc, bool landmarkVideoMode, bool auVideoMode,
                 std::optional<bool> wild, std::optional<bool> multi_view, std::optional<bool> limit_pose,
                 std::optional<int> n_iter, std::optional<float> reg_factor, std::optional<float> weight_factor);
 
-    // Main API method
-    std::vector<std::pair<std::string, double>> detectActionUnits(const Frame& frame, double timestamp, const BoundingBox& roi);
+    // Main API methods
+    std::vector<std::pair<std::string, double>> detectActionUnitPresence(const Frame& frame, double timestamp, const BoundingBox& roi);
+    std::vector<std::pair<std::string, double>> detectActionUnitIntensity(const Frame& frame, double timestamp, const BoundingBox& roi);
 
 private:
+    void loadFrame(const Frame& frame, double timestamp, const BoundingBox& face);
+
     // Face analyser parameters
     bool faceAnalyserVideoMode;
     std::vector<std::string> faceAnalyserArgList;

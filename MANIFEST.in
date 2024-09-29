@@ -1,3 +1,1 @@
 include vcpkg.json
-include mini_face/model/*
-include mini_face/AU_predictors/*
