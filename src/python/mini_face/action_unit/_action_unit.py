@@ -11,9 +11,8 @@ from ..common import PredictionMode
 
 @dataclass(frozen=True)
 class Result:
-    action_units: np.ndarray[Literal[2], np.dtype[np.uint8]]
-    presences: np.ndarray[Literal[2], np.dtype[np.bool_]]
-    intensities: np.ndarray[Literal[2], np.dtype[np.float32]]
+    action_units: np.ndarray[Literal[2], np.dtype[np.int64]]
+    intensities: np.ndarray[Literal[2], np.dtype[np.float64]]
 
 
 def time(step: float) -> Generator[float, None, None]:
@@ -31,13 +30,16 @@ def as_padded_and_imputed_with_zeros_array(
     n_rows = len(data)
     n_columns: int = len(max(filter(None, data), key=len, default=[]))
 
+    if n_columns == 0:
+        return np.zeros((1, 1), dtype=dtype)
+
     array = np.zeros((n_rows, n_columns), dtype=dtype)
 
     for i, row in enumerate(data):
         if row is None:
             continue
 
-        np.copyto(array[i, len(row) :], row)
+        np.copyto(array[i, : len(row)], row, casting="same_kind")
 
     return array
 
@@ -106,6 +108,7 @@ class Extractor:
         self.fps = fps
 
         self.__model = AUExtractor(
+            models_directory,
             landmark_mode == PredictionMode.VIDEO,
             au_mode == PredictionMode.VIDEO,
             wild,
@@ -114,7 +117,6 @@ class Extractor:
             optimization_iterations,
             regularization_factor,
             weight_factor,
-            models_directory,
         )
 
         self.__time = time(1.0 / float(fps))
@@ -135,8 +137,8 @@ class Extractor:
                     n_channels == 3
                 ), f"Wrong frame format: expected 3-channel RGB image, got {n_channels} channels"
 
-                prediction = self.__model.detect_action_units(
-                    frame, next(self.__time), region
+                prediction = self.__model.detect_au_intensity(
+                    frame, next(self.__time), tuple(region)
                 )
 
                 if prediction is None:
@@ -144,10 +146,9 @@ class Extractor:
 
                 return Result(
                     np.array(
-                        ([convert(unit[0]) for unit in prediction],), dtype=np.uint8
+                        ([convert(unit[0]) for unit in prediction],), dtype=np.int64
                     ),
-                    np.array(([unit[1] for unit in prediction],), dtype=bool),
-                    np.array(([unit[2] for unit in prediction],), dtype=np.float32),
+                    np.array(([unit[1] for unit in prediction],), dtype=np.float64),
                 )
 
             case (n_frames, _, _, n_channels), (n_regions, n_elements):
@@ -162,7 +163,7 @@ class Extractor:
                 ), f"Wrong frame format: expected 3-channel RGB image, got {n_channels} channels"
 
                 predictions = [
-                    self.__model.detect_action_units(frame, timestamp, region)
+                    self.__model.detect_au_intensity(frame, timestamp, tuple(region))
                     for frame, timestamp, region in zip(frame, self.__time, region)
                 ]
 
@@ -173,20 +174,14 @@ class Extractor:
                     for prediction in predictions
                 ]
 
-                presences = [
+                intensities = [
                     [unit[1] for unit in prediction] if prediction is not None else None
                     for prediction in predictions
                 ]
 
-                intensities = [
-                    [unit[2] for unit in prediction] if prediction is not None else None
-                    for prediction in predictions
-                ]
-
                 return Result(
-                    as_padded_and_imputed_with_zeros_array(units, np.uint8),
-                    as_padded_and_imputed_with_zeros_array(presences, np.bool_),
-                    as_padded_and_imputed_with_zeros_array(intensities, np.float32),
+                    as_padded_and_imputed_with_zeros_array(units, np.int64),
+                    as_padded_and_imputed_with_zeros_array(intensities, np.float64),
                 )
 
             case _:

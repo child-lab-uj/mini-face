@@ -24,7 +24,7 @@ def time(step: float) -> Generator[float, None, None]:
         current += step
 
 
-__EMPTY_ENTRY = ((0.0, 0.0, 0.0), (0.0, 0.0, 0.0))
+EMPTY_ENTRY = ((0.0, 0.0, 0.0), (0.0, 0.0, 0.0))
 
 
 class Extractor:
@@ -110,7 +110,7 @@ class Extractor:
             limit_angles,
             optimization_iterations,
             regularization_factor,
-            weight_factor
+            weight_factor,
         )
 
         model.set_camera_calibration(fx, fy, cx, cy)
@@ -135,7 +135,7 @@ class Extractor:
                 ), f"Wrong frame format: expected 3-channel RGB image, got {n_channels} channels"
 
                 result = self.__model.detect_gaze(
-                    frame, next(self.__time), tuple(map(int, region))
+                    frame, next(self.__time), tuple(region)
                 )
 
                 if result is None:
@@ -161,17 +161,15 @@ class Extractor:
                 ), f"Wrong frame format: expected 3-channel RGB image, got {n_channels} channels"
 
                 predictions = [
-                    self.__model.detect_gaze(frame, timestamp, region)
-                    for frame, timestamp, region in zip(
-                        frame, self.__time, tuple(map(int, region))
-                    )
+                    self.__model.detect_gaze(frame, timestamp, tuple(region))
+                    for frame, timestamp, region in zip(frame, self.__time, region)
                 ]
 
                 eyes = np.array(
                     [
                         (prediction.eye1, prediction.eye2)
                         if prediction is not None
-                        else __EMPTY_ENTRY
+                        else EMPTY_ENTRY
                         for prediction in predictions
                     ],
                     dtype=np.float32,
@@ -181,7 +179,7 @@ class Extractor:
                     [
                         (prediction.direction1, prediction.direction2)
                         if prediction is not None
-                        else __EMPTY_ENTRY
+                        else EMPTY_ENTRY
                         for prediction in predictions
                     ],
                     dtype=np.float32,
