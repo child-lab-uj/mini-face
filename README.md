@@ -2,44 +2,33 @@
 
 ## Installation with pip
 > Requirements: `python 3.12`.
-Install the package with a following command:
+1. Install the package with a following command:
 ```
    python3 -m pip install mini-face
 ```
-
-## Installation from source
-> Requirements: `cmake`, `vcpkg`, `python 3.12`.<br>
-> Recommended to use a virtual environment.
-1. Install the `scikit-build` module:
-```
-pip install scikit-build
-```
-2. Download and install the repository:
-```
-git clone https://github.com/child-lab-uj/gaze-tracking
-cd gaze-tracking
-pip install .
-```
-
-## Short description of the project structure:
-- */src/* - source code - OpenFace source, wrappers and Python bindings
-- */model/* - Model data from the official OpenFace release
-- */AU_predictors/* - Model data from the official OpenFace release
+2. Download model data files (subdirectories **/model/** and **/AU_predictors/**) from this repository or official
+   <a href="https://github.com/TadasBaltrusaitis/OpenFace/releases" title="OpenFace releases">OpenFace release</a>.
+   You will also need files from <a href="https://github.com/TadasBaltrusaitis/OpenFace/wiki/Model-download" title="OpenFace models">here</a>.
 
 ## Python usage
 Below is a minimalist example of using the module from Python code:
 
 ```
    import cv2
-   import mini_face.api
+   import numpy as np
+   from mini_face.gaze import Extractor
+   from mini_face.common import PredictionMode
 
    if __name__ == "__main__":
       image = cv2.imread("test_image.jpg")
-      roi = (214.467, 96.9926, 110.877, 117.08)
+      extractor = Extractor(
+        mode=PredictionMode.VIDEO,
+        focal_length=(500, 500),
+        optical_center=(860.0, 540.0),
+        models_directory="./model",
+      )
 
-      extractor = mini_face.api.GazeExtractor()
+       result = extractor.predict(image, np.array([0.0, 0.0, 1080.0, 1920.0]))
 
-      extractor.estimate_camera_calibration(image)
-
-      print(extractor.detect_gaze(image, 0, roi))
+       print(f"{result = }")
 ```
