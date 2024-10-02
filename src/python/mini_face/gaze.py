@@ -27,7 +27,7 @@ def time(step: float) -> Generator[float, None, None]:
 EMPTY_ENTRY = ((0.0, 0.0, 0.0), (0.0, 0.0, 0.0))
 
 
-class GazeFeatureExtractor:
+class Extractor:
     mode: PredictionMode
     wild: bool
     multiple_views: bool

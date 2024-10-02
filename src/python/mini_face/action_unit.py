@@ -48,7 +48,7 @@ def convert(au_label: str) -> int:
     return int("".join(filter(str.isdigit, au_label)) or "0")
 
 
-class AUFeatureExtractor:
+class Extractor:
     landmark_mode: PredictionMode
     au_mode: PredictionMode
     wild: bool
