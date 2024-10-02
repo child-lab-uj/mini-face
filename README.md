@@ -16,12 +16,12 @@ Below is a minimalist example of using the module from Python code:
 ```
    import cv2
    import numpy as np
-   from mini_face.gaze import Extractor
-   from mini_face.common import PredictionMode
+   from mini_face import GazeFeatureExtractor
+   from mini_face import PredictionMode
 
    if __name__ == "__main__":
       image = cv2.imread("test_image.jpg")
-      extractor = Extractor(
+      extractor = GazeFeatureExtractor(
         mode=PredictionMode.IMAGE,
         focal_length=(500, 500),
         optical_center=(860.0, 540.0),

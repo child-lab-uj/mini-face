@@ -5,14 +5,15 @@ from typing import Literal
 
 import numpy as np
 
-from ..api import AUExtractor  # type: ignore
-from ..common import PredictionMode
+from .api import GazeExtractor  # type: ignore
+from .mode import PredictionMode
 
 
 @dataclass(frozen=True)
 class Result:
-    action_units: np.ndarray[Literal[2], np.dtype[np.int64]]
-    intensities: np.ndarray[Literal[2], np.dtype[np.float64]]
+    eyes: np.ndarray[Literal[3], np.dtype[np.float32]]
+    directions: np.ndarray[Literal[3], np.dtype[np.float32]]
+    angles: np.ndarray[Literal[2], np.dtype[np.float32]]
 
 
 def time(step: float) -> Generator[float, None, None]:
@@ -23,34 +24,11 @@ def time(step: float) -> Generator[float, None, None]:
         current += step
 
 
-# skip typing - ndarray dtype is an absolute garbage
-def as_padded_and_imputed_with_zeros_array(
-    data: list[list | None], dtype
-) -> np.ndarray:
-    n_rows = len(data)
-    n_columns: int = len(max(filter(None, data), key=len, default=[]))
-
-    if n_columns == 0:
-        return np.zeros((1, 1), dtype=dtype)
-
-    array = np.zeros((n_rows, n_columns), dtype=dtype)
-
-    for i, row in enumerate(data):
-        if row is None:
-            continue
-
-        np.copyto(array[i, : len(row)], row, casting="same_kind")
-
-    return array
+EMPTY_ENTRY = ((0.0, 0.0, 0.0), (0.0, 0.0, 0.0))
 
 
-def convert(au_label: str) -> int:
-    return int("".join(filter(str.isdigit, au_label)) or "0")
-
-
-class Extractor:
-    landmark_mode: PredictionMode
-    au_mode: PredictionMode
+class GazeFeatureExtractor:
+    mode: PredictionMode
     wild: bool
     multiple_views: bool
     limit_angles: bool
@@ -59,27 +37,40 @@ class Extractor:
     weight_factor: float | None
 
     fps: int
+    fx: float
+    fy: float
+    cx: float
+    cy: float
 
     models: Path
 
-    __model: AUExtractor
+    __model: GazeExtractor
     __time: Generator[float, None, None]
     __time_step: float = 1.0 / 60.0
 
     def __init__(
         self,
         *,
-        landmark_mode: PredictionMode,
-        au_mode: PredictionMode,
+        mode: PredictionMode,
+        focal_length: tuple[float, float],
+        optical_center: tuple[float, float],
+        models_directory: str,
         fps: int = 60,
         wild: bool = False,
-        models_directory: str,
         multiple_views: bool = True,
         limit_angles: bool = False,
         optimization_iterations: int | None = None,
         regularization_factor: float | None = None,
         weight_factor: float | None = None,
     ) -> None:
+        fx, fy = focal_length
+        cx, cy = optical_center
+
+        assert fx > 0.0, "Focal length components must be positive"
+        assert fy > 0.0, "Focal length components must be positive"
+        assert cx > 0.0, "Optical center coordinates must be positive"
+        assert cy > 0.0, "Optical center coordinates must be positive"
+
         if optimization_iterations is not None:
             assert (
                 optimization_iterations > 0
@@ -97,7 +88,7 @@ class Extractor:
         assert models.exists() and models.is_dir(), "Invalid models directory passed"
         self.models = models
 
-        self.mode = landmark_mode
+        self.mode = mode
         self.wild = wild
         self.multiple_views = multiple_views
         self.limit_angles = limit_angles
@@ -106,11 +97,14 @@ class Extractor:
         self.weight_factor = weight_factor
 
         self.fps = fps
+        self.fx = fx
+        self.fy = fy
+        self.cx = cx
+        self.cy = cy
 
-        self.__model = AUExtractor(
+        model = GazeExtractor(
             models_directory,
-            landmark_mode == PredictionMode.VIDEO,
-            au_mode == PredictionMode.VIDEO,
+            mode == PredictionMode.VIDEO,
             wild,
             multiple_views,
             limit_angles,
@@ -119,6 +113,9 @@ class Extractor:
             weight_factor,
         )
 
+        model.set_camera_calibration(fx, fy, cx, cy)
+
+        self.__model = model
         self.__time = time(1.0 / float(fps))
 
     def predict(
@@ -137,18 +134,19 @@ class Extractor:
                     n_channels == 3
                 ), f"Wrong frame format: expected 3-channel RGB image, got {n_channels} channels"
 
-                prediction = self.__model.detect_au_intensity(
+                result = self.__model.detect_gaze(
                     frame, next(self.__time), tuple(region)
                 )
 
-                if prediction is None:
+                if result is None:
                     return None
 
                 return Result(
+                    np.array(((result.eye1, result.eye2),), dtype=np.float32),
                     np.array(
-                        ([convert(unit[0]) for unit in prediction],), dtype=np.int64
+                        ((result.direction1, result.direction2),), dtype=np.float32
                     ),
-                    np.array(([unit[1] for unit in prediction],), dtype=np.float64),
+                    result.angle,
                 )
 
             case (n_frames, _, _, n_channels), (n_regions, n_elements):
@@ -163,26 +161,39 @@ class Extractor:
                 ), f"Wrong frame format: expected 3-channel RGB image, got {n_channels} channels"
 
                 predictions = [
-                    self.__model.detect_au_intensity(frame, timestamp, tuple(region))
+                    self.__model.detect_gaze(frame, timestamp, tuple(region))
                     for frame, timestamp, region in zip(frame, self.__time, region)
                 ]
 
-                units = [
-                    [convert(unit[0]) for unit in prediction]
-                    if prediction is not None
-                    else None
-                    for prediction in predictions
-                ]
-
-                intensities = [
-                    [unit[1] for unit in prediction] if prediction is not None else None
-                    for prediction in predictions
-                ]
-
-                return Result(
-                    as_padded_and_imputed_with_zeros_array(units, np.int64),
-                    as_padded_and_imputed_with_zeros_array(intensities, np.float64),
+                eyes = np.array(
+                    [
+                        (prediction.eye1, prediction.eye2)
+                        if prediction is not None
+                        else EMPTY_ENTRY
+                        for prediction in predictions
+                    ],
+                    dtype=np.float32,
                 )
+
+                directions = np.array(
+                    [
+                        (prediction.direction1, prediction.direction2)
+                        if prediction is not None
+                        else EMPTY_ENTRY
+                        for prediction in predictions
+                    ],
+                    dtype=np.float32,
+                )
+
+                angles = np.array(
+                    [
+                        prediction.angle if prediction is not None else 0.0
+                        for prediction in predictions
+                    ],
+                    dtype=np.float32,
+                )
+
+                return Result(eyes, directions, angles)
 
             case _:
                 raise RuntimeError(
