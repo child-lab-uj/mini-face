@@ -12,7 +12,7 @@ option(CMAKE_FETCH_VCPKG "Whether to fetch vcpkg if VCPKG_ROOT is not set." ON)
 if(DEFINED CMAKE_TOOLCHAIN_FILE) # Print toolchain information
     message(STATUS "Using toolchain: ${CMAKE_TOOLCHAIN_FILE}")
 elseif(NOT DEFINED CMAKE_PROJECT_NAME)
-    if(DEFINED ENV{VCPKG_ROOT})
+    if(DEFINED $ENV{VCPKG_ROOT})
         message(STATUS "Using vcpkg installed in $ENV{VCPKG_ROOT}")
         set(CMAKE_TOOLCHAIN_FILE
             "$ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
