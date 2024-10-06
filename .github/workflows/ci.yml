@@ -1,4 +1,4 @@
-name: Build and store wheels
+name: CI
 
 on: [pull_request, workflow_call]
 
@@ -18,6 +18,13 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Debug
+        run: |
+          whereis g++
+          whereis c++
+          whereis gcc
+          whereis clang
+
       - name: Install vcpkg
         uses: lukka/run-vcpkg@v11.5
         # Separate vcpkg installation procedure on Linux
@@ -32,9 +39,3 @@ jobs:
       - name: Show obtained wheels and some debug info
         run: |
           ls ./dist
-
-      - name: Store wheels
-        uses: actions/upload-artifact@v3
-        with:
-          name: wheels
-          path: ./dist/*.whl

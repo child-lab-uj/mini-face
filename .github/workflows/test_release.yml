@@ -13,7 +13,7 @@ jobs:
 
   # TODO: think about reusing this job instead of copying
   build:
-    name: Build wheels on ${{ matrix.os }}
+    name: Build and store wheels on ${{ matrix.os }}
 
     runs-on: ${{ matrix.os }}
 
