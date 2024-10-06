@@ -16,6 +16,7 @@ echo ""
 
 # explicitly set C++ compiler for the fucking CMake
 export CMAKE_CXX_COMPILER=$(type -aP g++)
+export CXX=$(type -aP g++)
 
 echo "C++ Compiler: $CMAKE_CXX_COMPILER"
 
