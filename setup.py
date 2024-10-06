@@ -69,6 +69,10 @@ if len(packages) > 1:
 
 cmake_args = ["-DBUILD_TESTS=OFF"]
 
+if vcpkg := os.getenv("VCPKG_ROOT"):
+    print(f"vcpkg is located in {vcpkg}")
+    cmake_args.append(f"-DVCPKG_ROOT={vcpkg}")
+
 if cpp_compiler := os.getenv("CMAKE_CXX_COMPILER"):
     cmake_args.append(f"-DCMAKE_CXX_COMPILER={cpp_compiler}")
 
