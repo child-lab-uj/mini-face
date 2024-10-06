@@ -13,6 +13,7 @@ Raises:
 """
 
 import json
+import os
 import sys
 import warnings
 
@@ -77,10 +78,13 @@ setup(
     # ! setup_requires=["cmake"] should not be used, as it causes `vcpkg` to fail
     cmake_with_sdist=True,
     # Signal cmake to use `vcpkg`
-    cmake_args=["-DBUILD_TESTS=OFF"],
+    cmake_args=[
+        "-DBUILD_TESTS=OFF",
+        f"-DCMAKE_CXX_COMPILER={os.environ["CMAKE_CXX_COMPILER"]}",
+    ],
     # Add additional data
     include_package_data=True,
     package_data={
-        '': ['vcpkg.json'],
+        "": ["vcpkg.json"],
     },
 )
