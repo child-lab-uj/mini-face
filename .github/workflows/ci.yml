@@ -8,7 +8,7 @@ jobs:
   build-linux:
     name: Build wheels on Linux ${{ matrix.architecture }}
 
-    runs-on: ununtu-latest
+    runs-on: ubuntu-latest
 
     strategy:
       matrix:
