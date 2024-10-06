@@ -17,6 +17,8 @@ echo ""
 # explicitly set C++ compiler for the fucking CMake
 export CMAKE_CXX_COMPILER=$(type -aP g++)
 
+echo "C++ Compiler: $CMAKE_CXX_COMPILER"
+
 # install vcpkg :skull:
 git clone https://github.com/microsoft/vcpkg.git
 sh ./vcpkg/bootstrap-vcpkg.sh
