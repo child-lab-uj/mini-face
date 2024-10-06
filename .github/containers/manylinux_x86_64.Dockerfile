@@ -7,7 +7,7 @@ FROM quay.io/pypa/manylinux_2_28_x86_64:2024-08-12-7fde9b1
 #   * libxcrypt: autoconf automake libtool pkg-config
 RUN dnf -y install curl zip unzip tar ninja-build \
     autoconf automake libtool pkg-config \
-    libx11-dev libgles2-mesa-dev
+    libx11 libegl1-mesa-dev
 
 RUN git clone https://github.com/Microsoft/vcpkg.git /opt/vcpkg && \
     git -C /opt/vcpkg checkout tags/2024.09.30
