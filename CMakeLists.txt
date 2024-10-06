@@ -9,6 +9,8 @@ set(CMAKE_CXX_STANDARD 17)
 # vcpkg dependency manager
 option(CMAKE_FETCH_VCPKG "Whether to fetch vcpkg if VCPKG_ROOT is not set." ON)
 
+message("[Debug] vcpkg root:  $ENV{VCPKG_ROOT}")
+
 if(DEFINED CMAKE_TOOLCHAIN_FILE) # Print toolchain information
     message(STATUS "Using toolchain: ${CMAKE_TOOLCHAIN_FILE}")
 elseif(NOT DEFINED CMAKE_PROJECT_NAME)
