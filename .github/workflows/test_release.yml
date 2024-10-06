@@ -6,11 +6,6 @@ on:
       - "preproduction"
 
 jobs:
-  check-version:
-    name: Check version of the released package
-
-    runs-on: ubuntu-latest
-
   # TODO: think about reusing this job instead of copying
   build:
     name: Build and store wheels on ${{ matrix.os }}
