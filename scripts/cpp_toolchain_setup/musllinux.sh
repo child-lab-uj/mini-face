@@ -7,6 +7,9 @@ set -e
 # install tools
 apk add zip cmake pkgconfig ninja build-base
 
+# explicitly set C++ compiler for CMake
+export CMAKE_CXX_COMPILER=c++
+
 # install vcpkg :skull:
 git clone https://github.com/microsoft/vcpkg.git
 sh ./vcpkg/bootstrap-vcpkg.sh

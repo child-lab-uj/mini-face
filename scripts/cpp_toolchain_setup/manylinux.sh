@@ -7,6 +7,9 @@ set -e
 # install tools
 yum install -y zip cmake pkgconfig
 
+# explicitly set C++ compiler for the fucking CMake
+export CMAKE_CXX_COMPILER=c++
+
 # install vcpkg :skull:
 git clone https://github.com/microsoft/vcpkg.git
 sh ./vcpkg/bootstrap-vcpkg.sh
