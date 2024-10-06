@@ -15,7 +15,7 @@ whereis clang
 echo ""
 
 # explicitly set C++ compiler for CMake
-export CMAKE_CXX_COMPILER=c++
+export CMAKE_CXX_COMPILER=$(type -aP g++)
 
 # install vcpkg :skull:
 git clone https://github.com/microsoft/vcpkg.git
