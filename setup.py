@@ -67,7 +67,7 @@ if len(packages) > 1:
         f"rest of packages {packages[1:]} won't have access to C++ code."
     )
 
-vcpkg = os.environ["VCPKG_ROOT"]
+vcpkg = os.getenv("VCPKG_ROOT", "/project/vcpkg")
 
 cmake_args = ["-DBUILD_TESTS=OFF", f"-DVCPKG_ROOT={vcpkg}"]
 
