@@ -1,0 +1,40 @@
+name: Build and store wheels
+
+on: [pull_request, workflow_call]
+
+jobs:
+  build:
+    name: Build wheels on ${{ matrix.os }}
+
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-15]
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install vcpkg
+        uses: lukka/run-vcpkg@v11.5
+        # Separate vcpkg installation procedure on Linux
+        if: runner.os != 'Linux'
+
+      - name: Install cibuildwheel
+        run: python -m pip install cibuildwheel
+
+      - name: Build wheels
+        run: python -m cibuildwheel --output-dir dist
+
+      - name: Show obtained wheels and some debug info
+        run: |
+          ls ./dist
+
+      - name: Store wheels
+        uses: actions/upload-artifact@v3
+        with:
+          name: wheels
+          path: ./dist/*.whl
