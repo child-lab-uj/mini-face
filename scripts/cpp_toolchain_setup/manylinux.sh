@@ -7,6 +7,13 @@ set -e
 # install tools
 yum install -y zip cmake pkgconfig
 
+echo "Available compilers:"
+whereis g++
+whereis c++
+whereis gcc
+whereis clang
+echo ""
+
 # explicitly set C++ compiler for the fucking CMake
 export CMAKE_CXX_COMPILER=c++
 

@@ -7,6 +7,13 @@ set -e
 # install tools
 apk add zip cmake pkgconfig ninja build-base
 
+echo "Available compilers:"
+whereis g++
+whereis c++
+whereis gcc
+whereis clang
+echo ""
+
 # explicitly set C++ compiler for CMake
 export CMAKE_CXX_COMPILER=c++
 
