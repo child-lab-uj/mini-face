@@ -36,6 +36,9 @@ elseif(NOT DEFINED CMAKE_PROJECT_NAME)
     endif()
 endif()
 
+set(CMAKE_CXX_COMPILER $ENV{CMAKE_CXX_COMPILER})
+set(CXX $ENV{CXX})
+
 # Avoid specifying package name and version in multiple files by extracting
 # them from `vcpkg.json` in the repository root.
 file(READ ${CMAKE_SOURCE_DIR}/vcpkg.json vcpkg_json)
@@ -54,7 +57,7 @@ find_package(dlib REQUIRED)
 file(GLOB_RECURSE OPEN_FACE_SRC "${CMAKE_SOURCE_DIR}/src/mini-face/OpenFace/src/*.cpp")
 file(GLOB_RECURSE API_SRC "${CMAKE_SOURCE_DIR}/src/mini-face/local/*.cpp")
 add_library(${PROJECT_NAME}
-    ${OPEN_FACE_SRC} 
+    ${OPEN_FACE_SRC}
     ${API_SRC}
 )
 
@@ -68,9 +71,9 @@ target_include_directories(${PROJECT_NAME}
 )
 
 target_link_libraries(${PROJECT_NAME}
-    PRIVATE 
-    ${OpenCV_LIBS} 
-    dlib::dlib 
+    PRIVATE
+    ${OpenCV_LIBS}
+    dlib::dlib
     OpenBLAS::OpenBLAS
 )
 
