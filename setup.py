@@ -67,6 +67,11 @@ if len(packages) > 1:
         f"rest of packages {packages[1:]} won't have access to C++ code."
     )
 
+cmake_args = ["-DBUILD_TESTS=OFF"]
+
+if cpp_compiler := os.getenv("CMAKE_CXX_COMPILER"):
+    cmake_args.append(f"-DCMAKE_CXX_COMPILER={cpp_compiler}")
+
 setup(
     # Package metadata, comment out if it is provided in `pyproject.toml`.
     # name=PROJECT_NAME, # Use the name defined in `vcpkg.json`
@@ -78,10 +83,7 @@ setup(
     # ! setup_requires=["cmake"] should not be used, as it causes `vcpkg` to fail
     cmake_with_sdist=True,
     # Signal cmake to use `vcpkg`
-    cmake_args=[
-        "-DBUILD_TESTS=OFF",
-        f"-DCMAKE_CXX_COMPILER={os.environ["CMAKE_CXX_COMPILER"]}",
-    ],
+    cmake_args=cmake_args,
     # Add additional data
     include_package_data=True,
     package_data={
