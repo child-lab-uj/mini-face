@@ -67,14 +67,16 @@ if len(packages) > 1:
         f"rest of packages {packages[1:]} won't have access to C++ code."
     )
 
-cmake_args = ["-DBUILD_TESTS=OFF"]
+vcpkg = os.environ["VCPKG_ROOT"]
 
-if vcpkg := os.getenv("VCPKG_ROOT"):
-    print(f"vcpkg is located in {vcpkg}")
-    cmake_args.append(f"-DVCPKG_ROOT={vcpkg}")
+cmake_args = ["-DBUILD_TESTS=OFF", f"-DVCPKG_ROOT={vcpkg}"]
 
-if cpp_compiler := os.getenv("CMAKE_CXX_COMPILER"):
-    cmake_args.append(f"-DCMAKE_CXX_COMPILER={cpp_compiler}")
+# if vcpkg := os.getenv("VCPKG_ROOT"):
+#     print(f"vcpkg is located in {vcpkg}")
+#     cmake_args.append(f"-DVCPKG_ROOT={vcpkg}")
+
+# if cpp_compiler := os.getenv("CMAKE_CXX_COMPILER"):
+#     cmake_args.append(f"-DCMAKE_CXX_COMPILER={cpp_compiler}")
 
 setup(
     # Package metadata, comment out if it is provided in `pyproject.toml`.
