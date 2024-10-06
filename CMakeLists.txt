@@ -14,32 +14,31 @@ endif()
 if(DEFINED CMAKE_TOOLCHAIN_FILE) # Print toolchain information
     message(STATUS "Using toolchain: ${CMAKE_TOOLCHAIN_FILE}")
 elseif(NOT DEFINED CMAKE_PROJECT_NAME)
-    if(DEFINED VCPKG_ROOT)
-        message(STATUS "Using vcpkg installed in ${VCPKG_ROOT}")
+    if(DEFINED ENV{VCPKG_ROOT})
+        message(STATUS "Using vcpkg installed in $ENV{VCPKG_ROOT}")
         set(CMAKE_TOOLCHAIN_FILE
-            "${VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
+            "$ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
             CACHE FILEPATH ""
         )
+
+    elseif(CMAKE_FETCH_VCPKG)
+        message(STATUS "Fetching vcpkg")
+        include(FetchContent)
+        FetchContent_Declare(vcpkg
+            GIT_REPOSITORY https://github.com/microsoft/vcpkg/
+            GIT_TAG 2024.09.30
+        )
+        FetchContent_MakeAvailable(vcpkg)
+        set(CMAKE_TOOLCHAIN_FILE
+            "${vcpkg_SOURCE_DIR}/scripts/buildsystems/vcpkg.cmake"
+            CACHE FILEPATH ""
+        )
+        message(STATUS "Fetching vcpkg -- done")
     else()
-        message(FATAL_ERROR "vcpkg is not available")
+        message(STATUS
+            "Not using `vcpkg`. Consider setting CMAKE_FETCH_VCPKG=ON"
+        )
     endif()
-    # elseif(CMAKE_FETCH_VCPKG)
-    #     message(STATUS "Fetching vcpkg")
-    #     include(FetchContent)
-    #     FetchContent_Declare(vcpkg
-    #         GIT_REPOSITORY https://github.com/microsoft/vcpkg/
-    #         GIT_TAG 2022.09.27
-    #     )
-    #     FetchContent_MakeAvailable(vcpkg)
-    #     set(CMAKE_TOOLCHAIN_FILE
-    #         "${vcpkg_SOURCE_DIR}/scripts/buildsystems/vcpkg.cmake"
-    #         CACHE FILEPATH ""
-    #     )
-    #     message(STATUS "Fetching vcpkg -- done")
-    # else()
-    #     message(STATUS
-    #         "Not using `vcpkg`. Consider setting CMAKE_FETCH_VCPKG=ON"
-    #     )
 endif()
 
 # Avoid specifying package name and version in multiple files by extracting
