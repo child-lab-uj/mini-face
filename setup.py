@@ -67,9 +67,12 @@ if len(packages) > 1:
         f"rest of packages {packages[1:]} won't have access to C++ code."
     )
 
-vcpkg = os.getenv("VCPKG_ROOT", "/project/vcpkg")
+# vcpkg = os.getenv("VCPKG_ROOT", "/project/vcpkg")
 
-cmake_args = ["-DBUILD_TESTS=OFF", f"-DVCPKG_ROOT={vcpkg}"]
+cmake_args = [
+    "-DBUILD_TESTS=OFF",
+    # f"-DVCPKG_ROOT={vcpkg}"
+]
 
 # if vcpkg := os.getenv("VCPKG_ROOT"):
 #     print(f"vcpkg is located in {vcpkg}")

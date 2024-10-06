@@ -7,9 +7,9 @@ set(CMAKE_CXX_STANDARD 17)
 # vcpkg dependency manager
 option(CMAKE_FETCH_VCPKG "Whether to fetch vcpkg if VCPKG_ROOT is not set." ON)
 
-if(DEFINED CMAKE_CXX_COMPILER)
-    message("CMake C++ compiler" ${CMAKE_CXX_COMPILER})
-endif()
+# if(DEFINED CMAKE_CXX_COMPILER)
+#     message("CMake C++ compiler" ${CMAKE_CXX_COMPILER})
+# endif()
 
 if(DEFINED CMAKE_TOOLCHAIN_FILE) # Print toolchain information
     message(STATUS "Using toolchain: ${CMAKE_TOOLCHAIN_FILE}")
@@ -20,24 +20,25 @@ elseif(NOT DEFINED CMAKE_PROJECT_NAME)
             "$ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
             CACHE FILEPATH ""
         )
-
-    elseif(CMAKE_FETCH_VCPKG)
-        message(STATUS "Fetching vcpkg")
-        include(FetchContent)
-        FetchContent_Declare(vcpkg
-            GIT_REPOSITORY https://github.com/microsoft/vcpkg/
-            GIT_TAG 2024.09.30
-        )
-        FetchContent_MakeAvailable(vcpkg)
-        set(CMAKE_TOOLCHAIN_FILE
-            "${vcpkg_SOURCE_DIR}/scripts/buildsystems/vcpkg.cmake"
-            CACHE FILEPATH ""
-        )
-        message(STATUS "Fetching vcpkg -- done")
     else()
-        message(STATUS
-            "Not using `vcpkg`. Consider setting CMAKE_FETCH_VCPKG=ON"
-        )
+        message(WARNING "vcpkg is not available, proceeding without it")
+        # elseif(CMAKE_FETCH_VCPKG)
+        #     message(STATUS "Fetching vcpkg")
+        #     include(FetchContent)
+        #     FetchContent_Declare(vcpkg
+        #         GIT_REPOSITORY https://github.com/microsoft/vcpkg/
+        #         GIT_TAG 2024.09.30
+        #     )
+        #     FetchContent_MakeAvailable(vcpkg)
+        #     set(CMAKE_TOOLCHAIN_FILE
+        #         "${vcpkg_SOURCE_DIR}/scripts/buildsystems/vcpkg.cmake"
+        #         CACHE FILEPATH ""
+        #     )
+        #     message(STATUS "Fetching vcpkg -- done")
+        # else()
+        #     message(STATUS
+        #         "Not using `vcpkg`. Consider setting CMAKE_FETCH_VCPKG=ON"
+        #     )
     endif()
 endif()
 

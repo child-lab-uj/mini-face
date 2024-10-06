@@ -26,13 +26,22 @@ dependencies = ["numpy>=1.21"]
 [project.urls]
 repository = "https://github.com/child-lab-uj/mini-face"
 
+[tool.cibuildwheel]
+skip = ["pp*", "*musllinux*"]
+manylinux-x86_64-image = "manylinux_x86_64:latest"
+# manylinux-aarch64-image = "manylinux-aarch64-vcpkg-gdal:latest"
+build-verbosity = 3
+
 [tool.cibuildwheel.linux]
 archs = ['x86_64']
 
-[[tool.cibuildwheel.overrides]]
-select = "*-manylinux*"
-before-all = "sh scripts/cpp_toolchain_setup/manylinux.sh"
+[tool.cibuildwheel.linux.environment]
+VCPKG_INSTALLED = "$VCPKG_ROOT/installed/$VCPKG_DEFAULT_TRIPLET"
 
-[[tool.cibuildwheel.overrides]]
-select = "*-musllinux*"
-before-all = "sh scripts/cpp_toolchain_setup/musllinux.sh"
+# [[tool.cibuildwheel.overrides]]
+# select = "*-manylinux*"
+# before-all = "sh scripts/cpp_toolchain_setup/manylinux.sh"
+
+# [[tool.cibuildwheel.overrides]]
+# select = "*-musllinux*"
+# before-all = "sh scripts/cpp_toolchain_setup/musllinux.sh"
