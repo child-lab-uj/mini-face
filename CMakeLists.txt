@@ -3,6 +3,8 @@
 cmake_minimum_required(VERSION 3.21)
 
 set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_COMPILER $ENV{CMAKE_CXX_COMPILER})
+set(CXX $ENV{CXX})
 
 # vcpkg dependency manager
 option(CMAKE_FETCH_VCPKG "Whether to fetch vcpkg if VCPKG_ROOT is not set." ON)
@@ -35,9 +37,6 @@ elseif(NOT DEFINED CMAKE_PROJECT_NAME)
         )
     endif()
 endif()
-
-set(CMAKE_CXX_COMPILER $ENV{CMAKE_CXX_COMPILER})
-set(CXX $ENV{CXX})
 
 # Avoid specifying package name and version in multiple files by extracting
 # them from `vcpkg.json` in the repository root.
