@@ -41,7 +41,6 @@ elseif(NOT DEFINED CMAKE_PROJECT_NAME)
     #         "Not using `vcpkg`. Consider setting CMAKE_FETCH_VCPKG=ON"
     #     )
 endif()
-endif()
 
 # Avoid specifying package name and version in multiple files by extracting
 # them from `vcpkg.json` in the repository root.
