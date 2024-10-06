@@ -30,6 +30,7 @@ export PATH=$PATH:$VCPKG_ROOT
 
 # check if it works properly
 echo "[Debug info]:"
+echo "VCPKG_ROOT: $VCPKG_ROOT"
 whereis vcpkg
 vcpkg --version
 
