@@ -6,7 +6,7 @@ FROM quay.io/pypa/manylinux_2_28_x86_64:2024-08-12-7fde9b1
 #   * libepoxy: libx11-dev libgles2-mesa-dev
 #   * libxcrypt: autoconf automake libtool pkg-config
 RUN dnf -y install curl zip unzip tar ninja-build \
-    autoconf automake libtool pkg-config \
+    autoconf automake libtool pkg-config libxcrypt \
     libX11 mesa-libEGL-devel
 
 RUN git clone https://github.com/Microsoft/vcpkg.git /opt/vcpkg && \
