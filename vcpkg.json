@@ -6,7 +6,9 @@
       "name": "dlib",
       "default-features": false
     },
-    { "name": "pybind11" }
+    "openblas",
+    "opencv",
+    "pybind11"
   ],
   "description": "A minimalist Python wrapper for OpenFace library"
 }
