@@ -28,7 +28,7 @@ RUN bootstrap-vcpkg.sh && \
     vcpkg integrate install && \
     vcpkg integrate bash
 
-COPY .github/vcpkg_triplets/x64-linux-x86-64.cmake opt/vcpkg/custom_triplets/x64-linux.cmake
+COPY .github/vcpkg_triplets/x64-linux.cmake opt/vcpkg/custom_triplets/x64-linux.cmake
 COPY vcpkg.json opt/vcpkg/
 
 ENV LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/opt/vcpkg/installed/x64-linux/lib"
