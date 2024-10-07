@@ -1,6 +1,13 @@
 {
   "name": "mini-face",
   "version-semver": "0.1.0",
-  "dependencies": ["openblas", "opencv", "dlib", "pybind11"],
+  "dependencies": [
+    {
+      "name": "dlib",
+      "features": ["core", "image_processing"],
+      "default-features": false
+    },
+    { "name": "pybind11" }
+  ],
   "description": "A minimalist Python wrapper for OpenFace library"
 }
