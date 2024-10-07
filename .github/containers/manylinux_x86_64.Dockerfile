@@ -16,7 +16,7 @@ RUN git clone https://github.com/Microsoft/vcpkg.git /opt/vcpkg && \
 ENV VCPKG_ROOT="/opt/vcpkg"
 ENV PATH="${PATH}:/opt/vcpkg"
 
-ENV VCPKG_DEFAULT_TRIPLET="linux-x86-64"
+ENV VCPKG_DEFAULT_TRIPLET="x64-linux"
 
 # Don't build all the bloat from source
 ENV VCPKG_FORCE_SYSTEM_BINARIES=1
@@ -28,10 +28,10 @@ RUN bootstrap-vcpkg.sh && \
     vcpkg integrate install && \
     vcpkg integrate bash
 
-COPY .github/vcpkg_triplets/linux-x86-64.cmake opt/vcpkg/custom_triplets/linux-x86-64.cmake
+COPY .github/vcpkg_triplets/x64-linux-x86-64.cmake opt/vcpkg/custom_triplets/x64-linux.cmake
 COPY vcpkg.json opt/vcpkg/
 
-ENV LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/opt/vcpkg/installed/linux-x86-64/lib"
+ENV LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/opt/vcpkg/installed/x64-linux/lib"
 
 RUN vcpkg install --overlay-triplets=opt/vcpkg/custom_triplets \
     --feature-flags="versions,manifests" \
