@@ -4,7 +4,7 @@
   "dependencies": [
     {
       "name": "dlib",
-      "features": ["core", "image_processing"],
+      "features": ["image_processing"],
       "default-features": false
     },
     { "name": "pybind11" }
