@@ -1,6 +1,6 @@
 # Inspired by https://github.com/geopandas/pyogrio
 
-FROM quay.io/pypa/manylinux_2_24_x86_64:2024-08-12-7fde9b1
+FROM quay.io/pypa/manylinux_2_24_x86_64
 
 # Required system dependencies:
 #   * libepoxy: libx11-dev libgles2-mesa-dev
