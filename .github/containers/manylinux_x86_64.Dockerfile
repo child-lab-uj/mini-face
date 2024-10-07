@@ -5,7 +5,7 @@ FROM quay.io/pypa/manylinux2014_x86_64
 # Required system dependencies:
 #   * libepoxy: libx11-dev libgles2-mesa-dev
 #   * libxcrypt: autoconf automake libtool pkg-config
-RUN yum -y install curl zip unzip tar cmake ninja-build pkg-config \
+RUN yum -y install curl zip unzip tar cmake ninja-build \
     openblas opencv dlib pybind11
 # autoconf automake libtool pkg-config libxcrypt \
 # libX11 mesa-libEGL-devel
