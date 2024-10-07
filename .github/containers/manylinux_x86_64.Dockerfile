@@ -17,6 +17,9 @@ ENV PATH="${PATH}:/opt/vcpkg"
 
 ENV VCPKG_DEFAULT_TRIPLET="linux-x86-64"
 
+# Don't build all the bloat from source
+ENV VCPKG_FORCE_SYSTEM_BINARIES=1
+
 # mkdir & touch -> workaround for https://github.com/microsoft/vcpkg/issues/27786
 RUN bootstrap-vcpkg.sh && \
     mkdir -p /root/.vcpkg/ $HOME/.vcpkg && \
