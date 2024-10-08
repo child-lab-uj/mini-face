@@ -7,7 +7,7 @@ FROM quay.io/pypa/manylinux_2_28_x86_64
 #   * libxcrypt: autoconf automake libtool pkg-config
 RUN yum -y install curl zip unzip tar \
     cmake ninja-build \
-    python312 \
+    python311 \
     automake libtool pkg-config
 
 RUN python3 --version
