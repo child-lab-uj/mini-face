@@ -7,6 +7,8 @@ FROM quay.io/pypa/manylinux_2_28_x86_64
 #   * libxcrypt: autoconf automake libtool pkg-config
 RUN yum -y install curl zip unzip tar cmake ninja-build python312
 
+RUN whereis python3 && whereis python312
+
 COPY /usr/bin/python3 /usr/bin/python36
 COPY /usr/bin/python312 /usr/bin/python3
 
