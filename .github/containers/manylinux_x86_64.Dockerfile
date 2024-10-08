@@ -5,12 +5,7 @@ FROM quay.io/pypa/manylinux_2_28_x86_64
 # Required system dependencies:
 #   * libepoxy: libx11-dev libgles2-mesa-dev
 #   * libxcrypt: autoconf automake libtool pkg-config
-RUN yum -y install curl zip unzip tar cmake ninja-build python312
-
-RUN whereis python3 && whereis python312
-
-COPY /usr/bin/python3 /usr/bin/python36
-COPY /usr/bin/python312 /usr/bin/python3
+RUN yum -y install curl zip unzip tar cmake ninja-build python-3.12.6
 
 # openblas opencv pybind11
 # autoconf automake libtool pkg-config libxcrypt \
