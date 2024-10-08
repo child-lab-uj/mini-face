@@ -1,6 +1,6 @@
 # Inspired by https://github.com/geopandas/pyogrio
 
-FROM quay.io/pypa/manylinux2014_x86_64
+FROM quay.io/pypa/manylinux_2_28_x86_64
 
 # Required system dependencies:
 #   * libepoxy: libx11-dev libgles2-mesa-dev
@@ -18,9 +18,6 @@ ENV PATH="${PATH}:/opt/vcpkg"
 
 ENV VCPKG_DEFAULT_TRIPLET="x64-linux"
 
-# Don't build all the bloat from source
-ENV VCPKG_FORCE_SYSTEM_BINARIES=1
-
 # mkdir & touch -> workaround for https://github.com/microsoft/vcpkg/issues/27786
 RUN bootstrap-vcpkg.sh && \
     mkdir -p /root/.vcpkg/ $HOME/.vcpkg && \
@@ -28,12 +25,12 @@ RUN bootstrap-vcpkg.sh && \
     vcpkg integrate install && \
     vcpkg integrate bash
 
-COPY .github/vcpkg_triplets/x64-linux.cmake opt/vcpkg/custom_triplets/x64-linux.cmake
+# COPY .github/vcpkg_triplets/x64-linux.cmake opt/vcpkg/custom_triplets/x64-linux.cmake
 COPY vcpkg.json opt/vcpkg/
 
 ENV LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/opt/vcpkg/installed/x64-linux/lib"
 
-RUN vcpkg install --overlay-triplets=opt/vcpkg/custom_triplets \
+RUN vcpkg install \
     --feature-flags="versions,manifests" \
     --x-manifest-root=opt/vcpkg \
     --x-install-root=opt/vcpkg/installed && \
