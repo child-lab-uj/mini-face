@@ -5,11 +5,12 @@ FROM quay.io/pypa/manylinux_2_28_x86_64
 # Required system dependencies:
 #   * libepoxy: libx11-dev libgles2-mesa-dev
 #   * libxcrypt: autoconf automake libtool pkg-config
-RUN yum -y install curl zip unzip tar cmake ninja-build python-3.12.6
+RUN yum -y install curl zip unzip tar \
+    cmake ninja-build \
+    python312 \
+    automake libtool pkg-config
 
-# openblas opencv pybind11
-# autoconf automake libtool pkg-config libxcrypt \
-# libX11 mesa-libEGL-devel
+RUN python3 --version
 
 RUN git clone https://github.com/Microsoft/vcpkg.git /opt/vcpkg && \
     git -C /opt/vcpkg checkout tags/2024.09.30
