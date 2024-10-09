@@ -5,10 +5,11 @@ FROM quay.io/pypa/manylinux_2_28_x86_64
 # Required system dependencies:
 #   * libepoxy: libx11-dev libgles2-mesa-dev
 #   * libxcrypt: autoconf automake libtool pkg-config
-RUN yum -y install curl zip unzip tar \
+RUN yum -y install \
+    curl zip unzip tar \
     cmake ninja-build \
-    python311 \
     autoconf automake libtool pkg-config \
+    python311 \
     opencv openblas
 
 RUN python3 --version
@@ -20,6 +21,7 @@ ENV VCPKG_ROOT="/opt/vcpkg"
 ENV PATH="${PATH}:/opt/vcpkg"
 
 ENV VCPKG_DEFAULT_TRIPLET="x64-linux"
+ENV VCPKG_FORCE_SYSTEM_BINARIES=1
 
 # mkdir & touch -> workaround for https://github.com/microsoft/vcpkg/issues/27786
 RUN bootstrap-vcpkg.sh && \
