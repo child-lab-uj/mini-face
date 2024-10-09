@@ -8,7 +8,8 @@ FROM quay.io/pypa/manylinux_2_28_x86_64
 RUN yum -y install curl zip unzip tar \
     cmake ninja-build \
     python311 \
-    autoconf automake libtool pkg-config
+    autoconf automake libtool pkg-config \
+    opencv openblas
 
 RUN python3 --version
 
@@ -30,13 +31,13 @@ RUN bootstrap-vcpkg.sh && \
 # COPY .github/vcpkg_triplets/x64-linux.cmake opt/vcpkg/custom_triplets/x64-linux.cmake
 COPY vcpkg.json opt/vcpkg/
 
-ENV LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/opt/vcpkg/installed/x64-linux/lib"
+ENV LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/usr/lib/:/opt/vcpkg/installed/x64-linux/lib"
 
-RUN vcpkg install \
-    --feature-flags="versions,manifests" \
-    --x-manifest-root=opt/vcpkg \
-    --x-install-root=opt/vcpkg/installed && \
-    vcpkg list
+# RUN vcpkg install \
+#     --feature-flags="versions,manifests" \
+#     --x-manifest-root=opt/vcpkg \
+#     --x-install-root=opt/vcpkg/installed && \
+#     vcpkg list
 
 # setting git safe directory is required for properly building wheels when
 # git >= 2.35.3
