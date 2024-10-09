@@ -35,11 +35,11 @@ COPY vcpkg.json opt/vcpkg/
 
 ENV LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/usr/lib/:/opt/vcpkg/installed/x64-linux/lib"
 
-# RUN vcpkg install \
-#     --feature-flags="versions,manifests" \
-#     --x-manifest-root=opt/vcpkg \
-#     --x-install-root=opt/vcpkg/installed && \
-#     vcpkg list
+RUN vcpkg install \
+    --feature-flags="versions,manifests" \
+    --x-manifest-root=opt/vcpkg \
+    --x-install-root=opt/vcpkg/installed && \
+    vcpkg list
 
 # setting git safe directory is required for properly building wheels when
 # git >= 2.35.3
