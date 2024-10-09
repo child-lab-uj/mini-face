@@ -5,10 +5,13 @@ FROM quay.io/pypa/manylinux_2_28_x86_64
 # Required system dependencies:
 #   * libepoxy: libx11-dev libgles2-mesa-dev
 #   * libxcrypt: autoconf automake libtool pkg-config
+#   * python3: autoconf autoconf-archive automake
+#   * openssl: perl-ICP-Cmd
 RUN yum -y install \
     curl zip unzip tar \
     cmake ninja-build \
-    autoconf automake libtool pkg-config perl-IPC-Cmd \
+    autoconf autoconf-archive automake libtool pkg-config \
+    perl-IPC-Cmd \
     python311 \
     opencv openblas
 
