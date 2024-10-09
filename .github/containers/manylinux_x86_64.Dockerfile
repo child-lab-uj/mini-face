@@ -8,7 +8,7 @@ FROM quay.io/pypa/manylinux_2_28_x86_64
 RUN yum -y install \
     curl zip unzip tar \
     cmake ninja-build \
-    autoconf automake libtool pkg-config \
+    autoconf automake libtool pkg-config perl-IPC-Cmd \
     python311 \
     opencv openblas
 
