@@ -40,6 +40,7 @@ add_library(${PROJECT_NAME}
     ${OPEN_FACE_SRC}
     ${API_SRC}
 )
+set_property(TARGET ${PROJECT_NAME} PROPERTY POSITION_INDEPENDENT_CODE ON)
 
 target_include_directories(${PROJECT_NAME}
     PUBLIC
