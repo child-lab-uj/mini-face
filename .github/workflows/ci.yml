@@ -12,10 +12,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install some of the C++ dependencies
-        run: |
-          brew install opencv
-
       - name: Install vcpkg
         uses: lukka/run-vcpkg@v11.5
         with:

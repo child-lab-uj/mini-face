@@ -39,4 +39,4 @@ archs = ['x86_64'] # TODO: add aarch64
 VCPKG_INSTALLED = "$VCPKG_ROOT/installed/$VCPKG_DEFAULT_TRIPLET"
 
 [tool.cibuildwheel.macos.environment]
-PKG_CONFIG_PATH = "/opt/homebrew/share/pkgconfig/"
+MACOSX_DEPLOYMENT_TARGET = "14.0"
