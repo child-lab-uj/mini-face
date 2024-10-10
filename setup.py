@@ -1,101 +1,86 @@
 """Build setup
 
-Setup the build environment for a C++ python extension module with `vcpkg` as
-C++ package manager. It uses `scikit-build` to build the C++ extension module
-and `GitPython` to pull `vcpkg` when it is defined as a submodule (as it is
-recommended).
+Setup the build environment for a C++ Python extension module.
+C++ dependencies can be managed by vcpkg if `VCPKG_ROOT` environmental variable is set.
+It uses `scikit-build` to build the C++ extension module.
 
-It is recommended to set the package metadata in the file `pyproject.toml`
-minimizing the amount of package specific configuration in this file.
-
-Raises:
-    RuntimeError: If `vcpkg` is not a submodule of the repository.
+Project metadata is read from `pyproject.toml`, however `vcpkg.json` is verified too.
 """
 
-import json
-import os
-import sys
-import warnings
+# Based on https://github.com/mcleantom/scikit_build_core_vcpkg
 
+import json
 from pathlib import Path
 from shutil import rmtree
+from typing import Any
 
+import tomllib
 from setuptools import find_packages
-
-try:
-    from skbuild import setup
-except ImportError:
-    print(
-        "Please update pip, you need pip 10 or greater,\n or you need to "
-        "install the PEP 518 requirements in pyproject.toml yourself",
-        file=sys.stderr,
-    )
-    raise
+from skbuild import setup
 
 PROJECT_SOURCE_DIR = Path(__file__).parent
+PYPROJECT_MANIFEST = PROJECT_SOURCE_DIR / "pyproject.toml"
+VCPKG_MANIFEST = PROJECT_SOURCE_DIR / "vcpkg.json"
+SKBUILD_DIR = PROJECT_SOURCE_DIR / "_skbuild"
+PYTHON_PACKAGES_ROOT = "src/python"
 
 # For some reason, running this file twice in a row causes the build to fail:
 # fatal error C1083: Cannot open include file: 'io.h'
 # Therefore the workaround is to clean the `_skbuild` directory before running
-SKBUILD_DIR = PROJECT_SOURCE_DIR / "_skbuild"
 if SKBUILD_DIR.exists():
     print(f"Removing previous installation: {SKBUILD_DIR}")
     rmtree(str(SKBUILD_DIR))
 
-# In order to avoid specifying package name and version in multiple files, we
-# will use `vcpkg.json` in the repository root as reference and extract the
-# apropiate variables from there.
-with open(PROJECT_SOURCE_DIR / "vcpkg.json") as f:
-    vcpkg_json = json.load(f)
-    # Required
-    PROJECT_VERSION_STRING = vcpkg_json["version-semver"]
-    PROJECT_NAME = vcpkg_json["name"]
+# Name and version are read from `pyproject.toml`
+with open(PYPROJECT_MANIFEST, mode="rb") as file:
+    manifest: dict[str, Any] = tomllib.load(file)
 
-# scikit-build will take care of puting our compiled C++ library together with
-# our python package so it can access it. The name of the python package will
-# be determined by the name of the folder that contains an `__init__.py` file.
-# In this repository, python packages must be placed under path defined by
-# `python_packages_root`.
-# ! In order to change the name of the package, the name of the folder that
-# ! contains the `__init__.py` file must be changed.
-python_packages_root = "src/python"
-packages = find_packages(python_packages_root)
-if len(packages) > 1:
-    warnings.warn(
-        "This extension is not supposed to have more than one package. The "
-        f"compiled C++ code will be placed only in `{packages[0]}`. The "
-        f"rest of packages {packages[1:]} won't have access to C++ code."
-    )
+    PROJECT_VERSION_STRING: str = manifest["version"]
+    PROJECT_NAME: str = manifest["name"]
 
-# vcpkg = os.getenv("VCPKG_ROOT", "/project/vcpkg")
+# Versions and names must be identical in both C++ and Python manifests
+with open(VCPKG_MANIFEST, mode="r") as f:
+    vcpkg_json: dict[str, Any] = json.load(f)
+    cpp_project_version: str = vcpkg_json["version-semver"]
+    cpp_project_name: str = vcpkg_json["name"]
+
+    if cpp_project_version != PROJECT_VERSION_STRING:
+        raise RuntimeError(
+            f"Project version mismatch - pyproject.toml: {PROJECT_VERSION_STRING}, vcpkg.json: {cpp_project_version}"
+        )
+
+    if cpp_project_version != PROJECT_VERSION_STRING:
+        raise RuntimeError(
+            f"Project name mismatch - pyproject.toml: {PROJECT_NAME}, vcpkg.json: {cpp_project_name}"
+        )
+
+packages = find_packages(PYTHON_PACKAGES_ROOT)
+
+# Python packages are going to be placed here
+package_dir = {"": PYTHON_PACKAGES_ROOT}
+
+# Compiled C++ code in a form of a shared object is going to be placed in this directory
+cmake_install_dir = PYTHON_PACKAGES_ROOT + "/mini_face"
 
 cmake_args = [
     "-DBUILD_TESTS=OFF",
-    # f"-DVCPKG_ROOT={vcpkg}"
 ]
 
-# if vcpkg := os.getenv("VCPKG_ROOT"):
-#     print(f"vcpkg is located in {vcpkg}")
-#     cmake_args.append(f"-DVCPKG_ROOT={vcpkg}")
-
-# if cpp_compiler := os.getenv("CMAKE_CXX_COMPILER"):
-#     cmake_args.append(f"-DCMAKE_CXX_COMPILER={cpp_compiler}")
+package_data = {
+    "": ["vcpkg.json"],  # ignored if vcpkg is not used (e.g. macOS CI/CD)
+}
 
 setup(
-    # Package metadata, comment out if it is provided in `pyproject.toml`.
-    # name=PROJECT_NAME, # Use the name defined in `vcpkg.json`
-    version=PROJECT_VERSION_STRING,  # Set version from `vcpkg.json`
+    name=PROJECT_NAME,
+    version=PROJECT_VERSION_STRING,
     packages=packages,
-    package_dir={"": python_packages_root},
-    cmake_install_dir=python_packages_root + "/" + packages[0],
-    # CMake must be used allways, otherwise C++ dependencies won't be installed
-    # ! setup_requires=["cmake"] should not be used, as it causes `vcpkg` to fail
+    package_dir=package_dir,
+    cmake_install_dir=cmake_install_dir,
+    # CMake must always be used, otherwise C++ dependencies won't be installed
+    # ! setup_requires=["cmake"] causes `vcpkg` to fail
     cmake_with_sdist=True,
-    # Signal cmake to use `vcpkg`
     cmake_args=cmake_args,
-    # Add additional data
+    # Add additional data to the package
     include_package_data=True,
-    package_data={
-        "": ["vcpkg.json"],
-    },
+    package_data=package_data,
 )

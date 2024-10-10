@@ -1,8 +1,13 @@
-name: CI
+name: CD
 
-on: [pull_request]
+on:
+  push:
+    branches:
+      - "main"
+      - "production/**"
 
 jobs:
+  # TODO: think about reusing these jobs instead of duplicating them
   build-macos:
     name: Build wheels on macOS arm-x64
 
@@ -75,3 +80,82 @@ jobs:
           name: ${{ matrix.wheel_name }}
           path: ./wheelhouse/*.whl
           compression-level: 0
+
+  deploy-test:
+    name: >-
+      Publish Python package to Test PyPI
+
+    needs:
+      - build-macos
+      - build-linux
+
+    runs-on: ubuntu-latest
+
+    environment:
+      name: test-pypi
+      url: https://test.pypi.org/p/mini-face
+
+    permissions:
+      id-token: write
+
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          pip install twine
+
+      - name: Download all the wheels
+        uses: actions/download-artifact@v3
+        with:
+          name: wheels
+          path: wheelhouse/
+
+      - name: Publish distribution to Test PyPI
+        run: |
+          twine upload -r testpypi wheelhouse/*
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.TEST_PYPI_KEY }}
+
+  deploy:
+    if: github.ref == 'refs/heads/main'
+
+    name: >-
+      Publish Python package to PyPI
+
+    needs:
+      - deploy-test
+
+    runs-on: ubuntu-latest
+
+    environment:
+      name: pypi
+      url: https://pypi.org/p/mini-face
+
+    permissions:
+      id-token: write
+
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          pip install twine
+
+      - name: Download all the wheels
+        uses: actions/download-artifact@v3
+        with:
+          name: wheels
+          path: wheelhouse/
+
+      - name: Publish distribution to Test PyPI
+        run: |
+          twine upload -r testpypi wheelhouse/*
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_KEY }}

@@ -10,6 +10,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "mini-face"
+version = "0.1.1"
 authors = [
     { name = "Igor Swat", email = "iswat@student.agh.edu.pl" },
     { name = "Jan Smółka", email = "jp.smolka@gmail.com" },
@@ -19,7 +20,6 @@ readme = "README.md"
 license = { text = "BSD 3-Clause License" }
 requires-python = ">=3.12"
 keywords = ["OpenFace", "vcpkg", "pybind11", "scikit-build", "cpp"]
-dynamic = ["version"]
 
 dependencies = ["numpy>=1.21"]
 
@@ -29,19 +29,11 @@ repository = "https://github.com/child-lab-uj/mini-face"
 [tool.cibuildwheel]
 skip = ["pp*", "*musllinux*"]
 manylinux-x86_64-image = "manylinux_x86_64:latest"
-# manylinux-aarch64-image = "manylinux-aarch64-vcpkg-gdal:latest"
+manylinux-aarch64-image = "manylinux-aarch64:latest"
 build-verbosity = 3
 
 [tool.cibuildwheel.linux]
-archs = ['x86_64']
+archs = ['x86_64'] # TODO: add aarch64
 
 [tool.cibuildwheel.linux.environment]
 VCPKG_INSTALLED = "$VCPKG_ROOT/installed/$VCPKG_DEFAULT_TRIPLET"
-
-# [[tool.cibuildwheel.overrides]]
-# select = "*-manylinux*"
-# before-all = "sh scripts/cpp_toolchain_setup/manylinux.sh"
-
-# [[tool.cibuildwheel.overrides]]
-# select = "*-musllinux*"
-# before-all = "sh scripts/cpp_toolchain_setup/musllinux.sh"
