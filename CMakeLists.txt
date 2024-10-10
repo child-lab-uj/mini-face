@@ -5,9 +5,6 @@ cmake_minimum_required(VERSION 3.21)
 set(CMAKE_CXX_STANDARD 17)
 set(VCPKG_BUILD_TYPE release)
 
-list(APPEND CMAKE_MODULE_PATH "/usr/share/") # For CI
-
-
 if(DEFINED CMAKE_TOOLCHAIN_FILE) # Print toolchain information
     message(STATUS "Using toolchain: ${CMAKE_TOOLCHAIN_FILE}")
 elseif(NOT DEFINED CMAKE_PROJECT_NAME)
@@ -85,7 +82,7 @@ if(DEFINED SKBUILD)
 
     # This function behaves very much like CMake’s builtin `add_library`
     pybind11_add_module(${PROJECT_PYTHON_API_NAME}
-        MODULE
+        SHARED
         src/python/api.cpp
     )
 
