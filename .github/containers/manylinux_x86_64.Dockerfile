@@ -13,8 +13,8 @@ RUN yum -y install \
     autoconf autoconf-archive automake libtool pkg-config \
     perl-IPC-Cmd \
     python311 \
-    opencv openblas
-
+    opencv opencv-devel \
+    openblas openblas-devel
 
 RUN git clone https://github.com/Microsoft/vcpkg.git /opt/vcpkg && \
     git -C /opt/vcpkg checkout tags/2024.09.30
