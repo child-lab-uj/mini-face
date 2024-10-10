@@ -14,7 +14,7 @@ jobs:
 
       - name: Install some of the C++ dependencies
         run: |
-          brew install dlib openblas pkg-config
+          brew install dlib openblas opencv pkg-config fd
 
       - name: Install vcpkg
         uses: lukka/run-vcpkg@v11.5
