@@ -18,6 +18,8 @@ import tomllib
 from setuptools import find_packages
 from skbuild import setup
 
+PROJECT_NAME: str
+PROJECT_VERSION: str
 PROJECT_SOURCE_DIR = Path(__file__).parent
 PYPROJECT_MANIFEST = PROJECT_SOURCE_DIR / "pyproject.toml"
 VCPKG_MANIFEST = PROJECT_SOURCE_DIR / "vcpkg.json"
@@ -34,9 +36,10 @@ if SKBUILD_DIR.exists():
 # Name and version are read from `pyproject.toml`
 with open(PYPROJECT_MANIFEST, mode="rb") as file:
     manifest: dict[str, Any] = tomllib.load(file)
+    project: dict[str, Any] = manifest["project"]
 
-    PROJECT_VERSION_STRING: str = manifest["version"]
-    PROJECT_NAME: str = manifest["name"]
+    PROJECT_VERSION = project["version"]
+    PROJECT_NAME = project["name"]
 
 # Versions and names must be identical in both C++ and Python manifests
 with open(VCPKG_MANIFEST, mode="r") as f:
@@ -44,12 +47,12 @@ with open(VCPKG_MANIFEST, mode="r") as f:
     cpp_project_version: str = vcpkg_json["version-semver"]
     cpp_project_name: str = vcpkg_json["name"]
 
-    if cpp_project_version != PROJECT_VERSION_STRING:
+    if cpp_project_version != PROJECT_VERSION:
         raise RuntimeError(
-            f"Project version mismatch - pyproject.toml: {PROJECT_VERSION_STRING}, vcpkg.json: {cpp_project_version}"
+            f"Project version mismatch - pyproject.toml: {PROJECT_VERSION}, vcpkg.json: {cpp_project_version}"
         )
 
-    if cpp_project_version != PROJECT_VERSION_STRING:
+    if cpp_project_version != PROJECT_VERSION:
         raise RuntimeError(
             f"Project name mismatch - pyproject.toml: {PROJECT_NAME}, vcpkg.json: {cpp_project_name}"
         )
@@ -72,7 +75,7 @@ package_data = {
 
 setup(
     name=PROJECT_NAME,
-    version=PROJECT_VERSION_STRING,
+    version=PROJECT_VERSION,
     packages=packages,
     package_dir=package_dir,
     cmake_install_dir=cmake_install_dir,
