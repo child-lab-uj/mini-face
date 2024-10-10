@@ -12,9 +12,18 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install C++ system dependencies
+      - name: Install some of the C++ dependencies
         run: |
-          brew install dlib openblas opencv
+          brew install dlib openblas pkg-config
+
+      - name: Install vcpkg
+        uses: lukka/run-vcpkg@v11.5
+        with:
+          vcpkgDirectory: "${{ github.workspace }}/vcpkg"
+
+      - name: Replace vcpkg manifest
+        run: |
+          cp .github/macos/vcpkg.json .
 
       - name: Build wheel
         uses: pypa/cibuildwheel@v2.21.1

@@ -26,8 +26,7 @@ elseif(NOT DEFINED CMAKE_PROJECT_NAME)
     endif()
 endif()
 
-# Avoid specifying package name and version in multiple files by extracting
-# them from `vcpkg.json` in the repository root.
+# Name and version from `vcpkg.json` is guaranteed to match `pyproject.toml`
 file(READ ${CMAKE_SOURCE_DIR}/vcpkg.json vcpkg_json)
 string(JSON PROJECT_NAME GET ${vcpkg_json} "name")
 string(JSON VERSION_STRING GET ${vcpkg_json} "version-semver")

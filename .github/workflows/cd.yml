@@ -19,7 +19,7 @@ jobs:
 
       - name: Install C++ system dependencies
         run: |
-          brew install dlib openblas opencv
+          brew install dlib openblas opencv pkg-config
 
       - name: Build wheel
         uses: pypa/cibuildwheel@v2.21.1
