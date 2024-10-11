@@ -33,7 +33,7 @@ jobs:
       - name: Store wheel
         uses: actions/upload-artifact@v4
         with:
-          name: "mini-face-macosx_14_0_arm64"
+          name: "wheel-mini-face-macosx_14_0_arm64"
           path: ./wheelhouse/*.whl
           compression-level: 0
 
@@ -45,7 +45,7 @@ jobs:
     strategy:
       matrix:
         include:
-          - wheel_name: "mini-face-manylinux_2_28_x86_64"
+          - wheel_name: "wheel-mini-facel-manylinux_2_28_x86_64"
             architecture: "x86_64"
             container: ".github/containers/manylinux_x86_64.Dockerfile"
           # TODO: add linux_aarch64
@@ -116,7 +116,9 @@ jobs:
       - name: Download all the wheels
         uses: actions/download-artifact@v4
         with:
+          pattern: "wheel**"
           path: ./wheelhouse/
+          merge-multiple: true
 
       - name: Publish distribution to Test PyPI
         run: |
