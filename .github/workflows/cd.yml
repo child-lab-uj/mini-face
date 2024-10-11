@@ -92,7 +92,8 @@ jobs:
       Publish Python package to PyPI
 
     needs:
-      - build
+      - build-macos
+      - build-linux
 
     runs-on: ubuntu-latest
 
