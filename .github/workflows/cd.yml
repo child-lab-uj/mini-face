@@ -114,14 +114,13 @@ jobs:
           pip install twine
 
       - name: Download all the wheels
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
-          name: wheels
-          path: wheelhouse/
+          path: ./wheelhouse/
 
       - name: Publish distribution to Test PyPI
         run: |
-          twine upload -r testpypi wheelhouse/*
+          twine upload -r testpypi ./wheelhouse/*.whl
         env:
           TWINE_USERNAME: __token__
           TWINE_PASSWORD: ${{ secrets.PYPI_KEY }}
