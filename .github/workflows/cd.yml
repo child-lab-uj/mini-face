@@ -2,8 +2,6 @@ name: CD
 
 on:
   push:
-    branches:
-      - "main"
     tags:
       - v[0-9]+.*
 
@@ -122,7 +120,7 @@ jobs:
 
       - name: Publish distribution to Test PyPI
         run: |
-          twine upload -r testpypi ./wheelhouse/*.whl
+          twine upload -r pypi ./wheelhouse/*.whl
         env:
           TWINE_USERNAME: __token__
           TWINE_PASSWORD: ${{ secrets.PYPI_KEY }}
