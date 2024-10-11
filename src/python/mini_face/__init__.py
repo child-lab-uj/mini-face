@@ -1,5 +1,4 @@
-from .api import __doc__, __version__
-from .api import *
-from .gaze import Extractor as GazeFeatureExtractor, Result as GazeResult
-from .action_unit import Extractor as AUFeatureExtractor, Result as AUResult
+from . import action_unit, gaze
 from .mode import PredictionMode
+
+__all__ = ["action_unit", "gaze", "PredictionMode"]

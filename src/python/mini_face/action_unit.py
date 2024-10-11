@@ -8,6 +8,8 @@ import numpy as np
 from .api import AUExtractor  # type: ignore
 from .mode import PredictionMode
 
+__all__ = ["Extractor", "Result"]
+
 
 @dataclass(frozen=True)
 class Result:
