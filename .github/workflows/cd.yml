@@ -5,6 +5,8 @@ on:
     branches:
       - "main"
       - "production/**"
+    tags:
+      - v[0-9]+.*
 
 jobs:
   # TODO: think about reusing these jobs instead of duplicating them
