@@ -4,8 +4,6 @@ on:
   push:
     branches:
       - "deploy/test-pypi"
-    tags:
-      - v[0-9]+.*
 
 jobs:
   # TODO: think about reusing these jobs instead of duplicating them
