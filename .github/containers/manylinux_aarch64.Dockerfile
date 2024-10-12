@@ -2,38 +2,40 @@
 
 FROM quay.io/pypa/manylinux_2_28_aarch64:2024-08-12-7fde9b1
 
-# building openssl needs IPC-Cmd (https://github.com/microsoft/vcpkg/issues/24988)
-RUN dnf -y install curl zip unzip tar ninja-build perl-IPC-Cmd
+# Required system dependencies:
+#   * libepoxy: libx11-dev libgles2-mesa-dev
+#   * libxcrypt: autoconf automake libtool pkg-config
+#   * python3: autoconf autoconf-archive automake
+#   * openssl: perl-ICP-Cmd
+RUN yum -y install \
+    curl zip unzip tar \
+    cmake ninja-build \
+    autoconf autoconf-archive automake libtool pkg-config \
+    perl-IPC-Cmd \
+    python311 \
+    opencv opencv-devel \
+    openblas openblas-devel \
+    libgfortran
 
-RUN git clone https://github.com/Microsoft/vcpkg.git /opt/vcpkg && \
-    git -C /opt/vcpkg checkout tags/2024.09.30
+RUN git clone https://github.com/davisking/dlib.git /opt/dlib && \
+    git -C /opt/dlib checkout tags/v19.24.6
 
-ENV VCPKG_INSTALLATION_ROOT="/opt/vcpkg"
-ENV PATH="${PATH}:/opt/vcpkg"
+WORKDIR /opt/dlib
 
-ENV VCPKG_DEFAULT_TRIPLET="arm64-linux-dynamic-release"
-# pkgconf fails to build with default debug mode of arm64-linux host
-ENV VCPKG_DEFAULT_HOST_TRIPLET="arm64-linux-release"
+RUN mkdir build
 
-# Must be set when building on arm
-ENV VCPKG_FORCE_SYSTEM_BINARIES=1
+WORKDIR /opt/dlib/build
 
-# mkdir & touch -> workaround for https://github.com/microsoft/vcpkg/issues/27786
-RUN bootstrap-vcpkg.sh && \
-    mkdir -p /root/.vcpkg/ $HOME/.vcpkg && \
-    touch /root/.vcpkg/vcpkg.path.txt $HOME/.vcpkg/vcpkg.path.txt && \
-    vcpkg integrate install && \
-    vcpkg integrate bash
+RUN cmake .. && \
+    cmake --build .
 
-# COPY ci/custom-triplets/arm64-linux-dynamic-release.cmake opt/vcpkg/custom-triplets/arm64-linux-dynamic-release.cmake
-COPY vcpkg.json opt/vcpkg/
+RUN ls -r dlib
 
-ENV LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/opt/vcpkg/installed/arm64-linux-dynamic-release/lib"
-RUN vcpkg install --overlay-triplets=opt/vcpkg/custom-triplets \
-    --feature-flags="versions,manifests" \
-    --x-manifest-root=opt/vcpkg \
-    --x-install-root=opt/vcpkg/installed && \
-    vcpkg list
+WORKDIR /opt/dlib/build/dlib
+
+RUN make install
+
+ENV LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/usr/lib/:/opt/vcpkg/installed/x64-linux/lib"
 
 # setting git safe directory is required for properly building wheels when
 # git >= 2.35.3
