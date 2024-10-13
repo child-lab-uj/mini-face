@@ -1,6 +1,6 @@
 [project]
 name = "mini-face"
-version = "0.1.1"
+version = "0.1.2"
 authors = [
     { name = "Igor Swat", email = "iswat@student.agh.edu.pl" },
     { name = "Jan Smółka", email = "jp.smolka@gmail.com" },
