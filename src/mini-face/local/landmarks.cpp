@@ -7,8 +7,12 @@ LandmarkExtractor::LandmarkExtractor(std::string model_loc, bool videoMode,
                                      std::optional<int> n_iter, std::optional<float> reg_factor, std::optional<float> weight_factor)
     : useVideoMode(videoMode)
 {
+    // Set up model directory
     // OpenFace will extract parent directory of model_loc and mark it as root
+    std::string model_root_filepath = model_loc + "/main_ceclm_general.txt";
     argList.push_back(model_loc);
+    argList.push_back("-mloc");
+    argList.push_back(model_root_filepath);
 
     // Add wild parameter
     if (wild.has_value())
