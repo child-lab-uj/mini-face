@@ -1,42 +1,32 @@
 # Inspired by https://github.com/geopandas/pyogrio
 
-FROM quay.io/pypa/manylinux_2_28_aarch64:2024-08-12-7fde9b1
+FROM --platform=linux/arm64 quay.io/pypa/manylinux_2_28_aarch64
 
-# Required system dependencies:
-#   * libepoxy: libx11-dev libgles2-mesa-dev
-#   * libxcrypt: autoconf automake libtool pkg-config
-#   * python3: autoconf autoconf-archive automake
-#   * openssl: perl-ICP-Cmd
+# Required dependencies installed by system manager:
+#   * general: cmake, ninja-build
+#   * mini-face: openblas
+#   * pybind11: python3*
+#   * python311: autoconf, autoconf-archive, automake
 RUN yum -y install \
-    curl zip unzip tar \
-    cmake ninja-build \
-    autoconf autoconf-archive automake libtool pkg-config \
-    perl-IPC-Cmd \
+    curl \
+    zip unzip tar \
+    autoconf autoconf-archive automake cmake ninja-build \
+    libtool pkg-config \
     python311 \
-    opencv opencv-devel \
-    openblas openblas-devel \
-    libgfortran
+    openblas openblas-devel
 
-RUN git clone https://github.com/davisking/dlib.git /opt/dlib && \
-    git -C /opt/dlib checkout tags/v19.24.6
+RUN --mount=type=cache,target=/tmp/git_cache/dlib \
+    git clone https://github.com/davisking/dlib.git /tmp/git_cache/dlib && \
+    cp -r /tmp/git_cache/dlib /opt/dlib
 
-WORKDIR /opt/dlib
+RUN --mount=type=cache,target=/tmp/git_cache/opencv \
+    git clone https://github.com/opencv/opencv.git /tmp/git_cache/opencv && \
+    cp -r /tmp/git_cache/opencv /opt/opencv
 
-RUN mkdir build
+RUN mkdir -p /opt/scripts
+COPY --chmod=777 .github/scripts/build_and_install_dependency.sh /opt/scripts
 
-WORKDIR /opt/dlib/build
+RUN /opt/scripts/build_and_install_dependency.sh dlib && \
+    /opt/scripts/build_and_install_dependency.sh opencv
 
-RUN cmake .. && \
-    cmake --build .
-
-RUN ls -r dlib
-
-WORKDIR /opt/dlib/build/dlib
-
-RUN make install
-
-ENV LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/usr/lib/:/opt/vcpkg/installed/x64-linux/lib"
-
-# setting git safe directory is required for properly building wheels when
-# git >= 2.35.3
 RUN git config --global --add safe.directory "*"
