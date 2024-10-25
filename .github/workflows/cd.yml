@@ -21,10 +21,6 @@ jobs:
         with:
           vcpkgDirectory: "${{ github.workspace }}/vcpkg"
 
-      - name: Replace vcpkg manifest
-        run: |
-          cp .github/macos/vcpkg.json .
-
       - name: Build wheel
         uses: pypa/cibuildwheel@v2.21.1
 
@@ -120,7 +116,7 @@ jobs:
 
       - name: Publish distribution to Test PyPI
         run: |
-          twine upload -r pypi ./wheelhouse/*.whl
+          twine upload -r testpypi ./wheelhouse/*.whl
         env:
           TWINE_USERNAME: __token__
           TWINE_PASSWORD: ${{ secrets.PYPI_KEY }}

@@ -1,40 +1,34 @@
 # Inspired by https://github.com/geopandas/pyogrio
 
-FROM quay.io/pypa/manylinux_2_28_aarch64:2024-08-12-7fde9b1
+FROM --platform=linux/arm64 quay.io/pypa/manylinux_2_28_aarch64
 
-# building openssl needs IPC-Cmd (https://github.com/microsoft/vcpkg/issues/24988)
-RUN dnf -y install curl zip unzip tar ninja-build perl-IPC-Cmd
+# Required dependencies installed by system manager:
+#   * general: cmake, ninja-build
+#   * mini-face: openblas
+#   * pybind11: python3*
+#   * python311: autoconf, autoconf-archive, automake
+RUN yum -y install \
+    curl \
+    zip unzip tar \
+    autoconf autoconf-archive automake cmake ninja-build \
+    libtool pkg-config \
+    python311 \
+    openblas openblas-devel
 
-RUN git clone https://github.com/Microsoft/vcpkg.git /opt/vcpkg && \
-    git -C /opt/vcpkg checkout tags/2024.09.30
+ENV LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/usr/lib/"
 
-ENV VCPKG_INSTALLATION_ROOT="/opt/vcpkg"
-ENV PATH="${PATH}:/opt/vcpkg"
+RUN --mount=type=cache,target=/tmp/git_cache/dlib \
+    git clone https://github.com/davisking/dlib.git /tmp/git_cache/dlib && \
+    cp -r /tmp/git_cache/dlib /opt/dlib
 
-ENV VCPKG_DEFAULT_TRIPLET="arm64-linux-dynamic-release"
-# pkgconf fails to build with default debug mode of arm64-linux host
-ENV VCPKG_DEFAULT_HOST_TRIPLET="arm64-linux-release"
+RUN --mount=type=cache,target=/tmp/git_cache/opencv \
+    git clone https://github.com/opencv/opencv.git /tmp/git_cache/opencv && \
+    cp -r /tmp/git_cache/opencv /opt/opencv
 
-# Must be set when building on arm
-ENV VCPKG_FORCE_SYSTEM_BINARIES=1
+RUN mkdir -p /opt/scripts
+COPY --chmod=777 .github/scripts/build_and_install_dependency.sh /opt/scripts
 
-# mkdir & touch -> workaround for https://github.com/microsoft/vcpkg/issues/27786
-RUN bootstrap-vcpkg.sh && \
-    mkdir -p /root/.vcpkg/ $HOME/.vcpkg && \
-    touch /root/.vcpkg/vcpkg.path.txt $HOME/.vcpkg/vcpkg.path.txt && \
-    vcpkg integrate install && \
-    vcpkg integrate bash
+RUN /opt/scripts/build_and_install_dependency.sh dlib && \
+    /opt/scripts/build_and_install_dependency.sh opencv
 
-# COPY ci/custom-triplets/arm64-linux-dynamic-release.cmake opt/vcpkg/custom-triplets/arm64-linux-dynamic-release.cmake
-COPY vcpkg.json opt/vcpkg/
-
-ENV LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/opt/vcpkg/installed/arm64-linux-dynamic-release/lib"
-RUN vcpkg install --overlay-triplets=opt/vcpkg/custom-triplets \
-    --feature-flags="versions,manifests" \
-    --x-manifest-root=opt/vcpkg \
-    --x-install-root=opt/vcpkg/installed && \
-    vcpkg list
-
-# setting git safe directory is required for properly building wheels when
-# git >= 2.35.3
 RUN git config --global --add safe.directory "*"

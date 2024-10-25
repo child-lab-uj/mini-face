@@ -16,10 +16,6 @@ jobs:
         with:
           vcpkgDirectory: "${{ github.workspace }}/vcpkg"
 
-      - name: Replace vcpkg manifest
-        run: |
-          cp .github/macos/vcpkg.json .
-
       - name: Build wheel
         uses: pypa/cibuildwheel@v2.21.1
 
@@ -41,7 +37,10 @@ jobs:
           - wheel_name: "mini-face-manylinux_2_28_x86_64"
             architecture: "x86_64"
             container: ".github/containers/manylinux_x86_64.Dockerfile"
-          # TODO: add linux_aarch64
+
+          - wheel_name: "mini-face-manylinux_2_28_aarch64"
+            architecture: "aarch64"
+            container: ".github/containers/manylinux_aarch64.Dockerfile"
 
     steps:
       - name: Checkout
