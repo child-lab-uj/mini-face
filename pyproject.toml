@@ -35,8 +35,5 @@ build-verbosity = 3
 [tool.cibuildwheel.linux]
 archs = ['x86_64', 'aarch64']
 
-[tool.cibuildwheel.linux.environment]
-VCPKG_INSTALLED = "$VCPKG_ROOT/installed/$VCPKG_DEFAULT_TRIPLET"
-
 [tool.cibuildwheel.macos.environment]
 MACOSX_DEPLOYMENT_TARGET = "14.0"
