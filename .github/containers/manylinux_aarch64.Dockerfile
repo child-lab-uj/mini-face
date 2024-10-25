@@ -13,22 +13,43 @@ RUN yum -y install \
     autoconf autoconf-archive automake cmake ninja-build \
     libtool pkg-config \
     python311 \
-    openblas openblas-devel
+    openblas openblas-devel \
+    perl-open \
+    perl-IPC-Cmd \
+    libXi libXi-devel \
+    libXt libXt-devel \
+    libXtst libXtst-devel \
+    libXrandr libXrandr-devel
 
-ENV LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/usr/lib/"
+# Required for libsystemd
+RUN python3 -m ensurepip --upgrade && \
+    python3 -m pip install jinja2
 
-RUN --mount=type=cache,target=/tmp/git_cache/dlib \
-    git clone https://github.com/davisking/dlib.git /tmp/git_cache/dlib && \
-    cp -r /tmp/git_cache/dlib /opt/dlib
+RUN git clone https://github.com/Microsoft/vcpkg.git /opt/vcpkg && \
+    git -C /opt/vcpkg checkout tags/2024.09.30
 
-RUN --mount=type=cache,target=/tmp/git_cache/opencv \
-    git clone https://github.com/opencv/opencv.git /tmp/git_cache/opencv && \
-    cp -r /tmp/git_cache/opencv /opt/opencv
+ENV VCPKG_ROOT="/opt/vcpkg"
+ENV PATH="${PATH}:/opt/vcpkg"
 
-RUN mkdir -p /opt/scripts
-COPY --chmod=777 .github/scripts/build_and_install_dependency.sh /opt/scripts
+ENV VCPKG_DEFAULT_TRIPLET="x64-linux"
 
-RUN /opt/scripts/build_and_install_dependency.sh dlib && \
-    /opt/scripts/build_and_install_dependency.sh opencv
+# mkdir & touch -> workaround for https://github.com/microsoft/vcpkg/issues/27786
+RUN bootstrap-vcpkg.sh && \
+    mkdir -p /root/.vcpkg/ $HOME/.vcpkg && \
+    touch /root/.vcpkg/vcpkg.path.txt $HOME/.vcpkg/vcpkg.path.txt && \
+    vcpkg integrate install && \
+    vcpkg integrate bash
 
+COPY vcpkg.json opt/vcpkg/
+
+ENV LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/usr/lib/:/opt/vcpkg/installed/x64-linux/lib"
+
+RUN vcpkg install \
+    --feature-flags="versions,manifests" \
+    --x-manifest-root=opt/vcpkg \
+    --x-install-root=opt/vcpkg/installed && \
+    vcpkg list
+
+# setting git safe directory is required for properly building wheels when
+# git >= 2.35.3
 RUN git config --global --add safe.directory "*"
