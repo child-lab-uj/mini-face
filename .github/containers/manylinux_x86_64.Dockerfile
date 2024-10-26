@@ -15,8 +15,12 @@ RUN yum -y install \
     python311 \
     openblas openblas-devel
 
-ENV LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/usr/lib/:/usr/lib64/" \
-    OpenBLAS_DIR="/usr/lib64/"
+# Setup OpenBLAS config file
+RUN mkdir -p /opt/openblas
+COPY --chmod=777 .github/scripts/OpenBLASConfig.cmake /opt/openblas
+
+ENV LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/usr/lib/:/usr/lib64/:/opt/openblas/" \
+    OpenBLAS_DIR="/opt/openblas/"
 
 RUN --mount=type=cache,target=/tmp/git_cache/dlib \
     git clone https://github.com/davisking/dlib.git /tmp/git_cache/dlib && \
