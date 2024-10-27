@@ -73,8 +73,6 @@ jobs:
         env:
           BUILDKIT_PROGRESS: plain
 
-      - uses: actions/checkout@v4
-
       - name: Build wheel
         uses: pypa/cibuildwheel@v2.21.1
 
