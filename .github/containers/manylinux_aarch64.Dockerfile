@@ -12,15 +12,19 @@ RUN yum -y install \
     zip unzip tar \
     autoconf autoconf-archive automake cmake ninja-build \
     libtool pkg-config \
-    python311 \
-    openblas openblas-devel
+    python311
 
-RUN git clone https://github.com/Microsoft/vcpkg.git /opt/vcpkg && \
-    git -C /opt/vcpkg checkout tags/2024.09.30
+
+RUN --mount=type=cache,target=/tmp/git_cache/vcpkg \
+    git clone https://github.com/Microsoft/vcpkg.git /tmp/git_cache/vcpkg && \
+    cp -r /tmp/git_cache/vcpkg /opt/vcpkg
+
+RUN git -C /opt/vcpkg checkout tags/2024.09.30
 
 ENV VCPKG_ROOT="/opt/vcpkg"
 ENV PATH="${PATH}:/opt/vcpkg"
-ENV VCPKG_DEFAULT_TRIPLET="x64-linux"
+ENV VCPKG_DEFAULT_TRIPLET="arm64-linux"
+ENV VCPKG_FORCE_SYSTEM_BINARIES=1
 
 RUN bootstrap-vcpkg.sh && \
     mkdir -p /root/.vcpkg/ $HOME/.vcpkg && \
@@ -28,15 +32,16 @@ RUN bootstrap-vcpkg.sh && \
     vcpkg integrate install && \
     vcpkg integrate bash
 
-COPY .github/scripts/vcpkg.json /opt/vcpkg/
+COPY .github/manifests/linux_x86_64/vcpkg.json /opt/vcpkg/
 
-ENV LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/usr/lib/:/usr/lib64/:/opt/vcpkg/installed/x64-linux/lib"
+ENV LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/usr/lib/:/usr/lib64/:/opt/vcpkg/installed/arm64-linux/lib"
 
 RUN vcpkg install \
     --feature-flags="versions,manifests" \
     --x-manifest-root=opt/vcpkg \
     --x-install-root=opt/vcpkg/installed && \
     vcpkg list
+
 
 RUN --mount=type=cache,target=/tmp/git_cache/dlib \
     git clone https://github.com/davisking/dlib.git /tmp/git_cache/dlib && \

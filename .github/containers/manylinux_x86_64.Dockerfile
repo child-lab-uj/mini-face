@@ -15,6 +15,33 @@ RUN yum -y install \
     python311
 
 
+RUN --mount=type=cache,target=/tmp/git_cache/vcpkg \
+    git clone https://github.com/Microsoft/vcpkg.git /tmp/git_cache/vcpkg && \
+    cp -r /tmp/git_cache/vcpkg /opt/vcpkg
+
+RUN git -C /opt/vcpkg checkout tags/2024.09.30
+
+ENV VCPKG_ROOT="/opt/vcpkg"
+ENV PATH="${PATH}:/opt/vcpkg"
+ENV VCPKG_DEFAULT_TRIPLET="x64-linux"
+
+RUN bootstrap-vcpkg.sh && \
+    mkdir -p /root/.vcpkg/ $HOME/.vcpkg && \
+    touch /root/.vcpkg/vcpkg.path.txt $HOME/.vcpkg/vcpkg.path.txt && \
+    vcpkg integrate install && \
+    vcpkg integrate bash
+
+COPY .github/manifests/linux_x86_64/vcpkg.json /opt/vcpkg/
+
+ENV LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/usr/lib/:/usr/lib64/:/opt/vcpkg/installed/x64-linux/lib"
+
+RUN vcpkg install \
+    --feature-flags="versions,manifests" \
+    --x-manifest-root=opt/vcpkg \
+    --x-install-root=opt/vcpkg/installed && \
+    vcpkg list
+
+
 RUN --mount=type=cache,target=/tmp/git_cache/dlib \
     git clone https://github.com/davisking/dlib.git /tmp/git_cache/dlib && \
     cp -r /tmp/git_cache/dlib /opt/dlib
@@ -28,31 +55,6 @@ COPY --chmod=777 .github/scripts/build_and_install_dependency.sh /opt/scripts
 
 RUN /opt/scripts/build_and_install_dependency.sh dlib && \
     /opt/scripts/build_and_install_dependency.sh opencv
-
-
-RUN --mount=type=cache,target=/tmp/git_cache/vcpkg \
-    git clone https://github.com/Microsoft/vcpkg.git /tmp/git_cache/vcpkg && \
-    git -C /tmp/git_cache/vcpkg checkout tags/2024.09.30 && \
-    cp -r /tmp/git_cache/vcpkg /opt/vcpkg
-
-RUN bootstrap-vcpkg.sh && \
-    mkdir -p /root/.vcpkg/ $HOME/.vcpkg && \
-    touch /root/.vcpkg/vcpkg.path.txt $HOME/.vcpkg/vcpkg.path.txt && \
-    vcpkg integrate install && \
-    vcpkg integrate bash
-
-COPY .github/manifests/linux_x86_64/vcpkg.json /opt/vcpkg/
-
-ENV VCPKG_ROOT="/opt/vcpkg"
-ENV PATH="${PATH}:/opt/vcpkg"
-ENV VCPKG_DEFAULT_TRIPLET="x64-linux"
-ENV LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/usr/lib/:/usr/lib64/:/opt/vcpkg/installed/x64-linux/lib"
-
-RUN vcpkg install \
-    --feature-flags="versions,manifests" \
-    --x-manifest-root=opt/vcpkg \
-    --x-install-root=opt/vcpkg/installed && \
-    vcpkg list
 
 
 RUN git config --global --add safe.directory "*"
