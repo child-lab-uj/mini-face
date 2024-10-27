@@ -32,7 +32,7 @@ RUN bootstrap-vcpkg.sh && \
     vcpkg integrate install && \
     vcpkg integrate bash
 
-COPY ./vcpkg.json /opt/vcpkg/
+COPY .github/manifests/linux_aarch64/vcpkg.json /opt/vcpkg/
 
 ENV LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/usr/lib/:/usr/lib64/:/opt/vcpkg/installed/arm64-linux/lib"
 
