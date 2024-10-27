@@ -29,8 +29,8 @@ RUN git clone https://github.com/Microsoft/vcpkg.git /opt/vcpkg && \
 
 ENV VCPKG_ROOT="/opt/vcpkg"
 ENV PATH="${PATH}:/opt/vcpkg"
-
-ENV VCPKG_DEFAULT_TRIPLET="x64-linux"
+ENV VCPKG_BUILD_TYPE="release"
+ENV VCPKG_DEFAULT_TRIPLET="x64-linux-release"
 
 # mkdir & touch -> workaround for https://github.com/microsoft/vcpkg/issues/27786
 RUN bootstrap-vcpkg.sh && \
@@ -39,15 +39,7 @@ RUN bootstrap-vcpkg.sh && \
     vcpkg integrate install && \
     vcpkg integrate bash
 
-COPY vcpkg.json opt/vcpkg/
-
-ENV LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/usr/lib/:/opt/vcpkg/installed/x64-linux/lib"
-
-RUN vcpkg install \
-    --feature-flags="versions,manifests" \
-    --x-manifest-root=opt/vcpkg \
-    --x-install-root=opt/vcpkg/installed && \
-    vcpkg list
+ENV LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/usr/lib/:/opt/vcpkg/installed/x64-linux/lib:/opt/vcpkg/installed/x64-linux-release/lib"
 
 # setting git safe directory is required for properly building wheels when
 # git >= 2.35.3

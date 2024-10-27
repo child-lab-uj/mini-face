@@ -33,6 +33,8 @@ string(JSON VERSION_STRING GET ${vcpkg_json} "version-semver")
 
 project(${PROJECT_NAME} VERSION ${VERSION_STRING} LANGUAGES CXX)
 
+set(CMAKE_BUILD_TYPE Release)
+
 # ------------------------- Build the project library -------------------------
 
 # Project dependencies
