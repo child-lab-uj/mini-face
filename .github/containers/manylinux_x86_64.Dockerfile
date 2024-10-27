@@ -31,7 +31,7 @@ RUN bootstrap-vcpkg.sh && \
     vcpkg integrate install && \
     vcpkg integrate bash
 
-COPY .github/manifests/linux_x86_64/vcpkg.json /opt/vcpkg/
+COPY ./vcpkg.json /opt/vcpkg/
 
 ENV LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/usr/lib/:/usr/lib64/:/opt/vcpkg/installed/x64-linux/lib"
 
