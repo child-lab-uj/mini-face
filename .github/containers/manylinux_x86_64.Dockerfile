@@ -32,7 +32,7 @@ RUN /opt/scripts/build_and_install_dependency.sh dlib && \
 
 RUN --mount=type=cache,target=/tmp/git_cache/vcpkg \
     git clone https://github.com/Microsoft/vcpkg.git /tmp/git_cache/vcpkg && \
-    git -C /tmp/git_cache/vcpkg checkout tags/2024.09.30 \
+    git -C /tmp/git_cache/vcpkg checkout tags/2024.09.30 && \
     cp -r /tmp/git_cache/vcpkg /opt/vcpkg
 
 RUN bootstrap-vcpkg.sh && \
