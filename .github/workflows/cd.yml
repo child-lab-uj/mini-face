@@ -16,15 +16,21 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       
+      - name: Set default triplet
+        run: echo "VCPKG_DEFAULT_TRIPLET=x64-windows" >> $GITHUB_ENV
+      
       - name: Install vcpkg
         uses: lukka/run-vcpkg@v11.5
         with:
           vcpkgDirectory: "${{ github.workspace }}\\vcpkg"
+          triplet: "x64-windows"
       
       - name: Build wheel
         uses: pypa/cibuildwheel@v2.21.1
         with:
           platform: "windows"
+          python-version: "3.12"
+          architecture: "x64"
       
       - name: Store wheel
         uses: actions/upload-artifact@v4
