@@ -56,5 +56,7 @@ COPY --chmod=777 .github/scripts/build_and_install_dependency.sh /opt/scripts
 RUN /opt/scripts/build_and_install_dependency.sh dlib && \
     /opt/scripts/build_and_install_dependency.sh opencv
 
+# Link the opencv & dlib libraries
+ENV LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/opt/opencv/build/lib:/opt/dlib/build/dlib"
 
 RUN git config --global --add safe.directory "*"
