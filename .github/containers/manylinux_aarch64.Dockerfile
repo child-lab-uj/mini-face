@@ -32,16 +32,19 @@ RUN bootstrap-vcpkg.sh && \
     vcpkg integrate install && \
     vcpkg integrate bash
 
-COPY .github/manifests/linux_aarch64/vcpkg.json /opt/vcpkg/
+COPY .github/manifests/manylinux_aarch64/vcpkg.json /opt/vcpkg/
 
 ENV LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/usr/lib/:/usr/lib64/:/opt/vcpkg/installed/arm64-linux/lib"
+
+# Fixing the 'Detecting CPU failed' issue
+ENV VCPKG_CMAKE_CONFIGURE_OPTIONS="-DTARGET=NEHALEM"
+ENV VCPKG_BUILD_OPTIONS="--cmake-args=-DTARGET=NEHALEM"
 
 RUN vcpkg install \
     --feature-flags="versions,manifests" \
     --x-manifest-root=opt/vcpkg \
     --x-install-root=opt/vcpkg/installed && \
     vcpkg list
-
 
 RUN --mount=type=cache,target=/tmp/git_cache/dlib \
     git clone https://github.com/davisking/dlib.git /tmp/git_cache/dlib && \
@@ -56,5 +59,8 @@ COPY --chmod=777 .github/scripts/build_and_install_dependency.sh /opt/scripts
 
 RUN /opt/scripts/build_and_install_dependency.sh dlib && \
     /opt/scripts/build_and_install_dependency.sh opencv
+
+# Link the opencv & dlib libraries
+ENV LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/opt/opencv/build/lib:/opt/dlib/build/dlib"
 
 RUN git config --global --add safe.directory "*"
