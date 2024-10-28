@@ -1,6 +1,6 @@
 [project]
 name = "mini-face"
-version = "0.1.2"
+version = "0.1.4"
 authors = [
     { name = "Igor Swat", email = "iswat@student.agh.edu.pl" },
     { name = "Jan Smółka", email = "jp.smolka@gmail.com" },
@@ -33,7 +33,7 @@ manylinux-aarch64-image = "manylinux-aarch64:latest"
 build-verbosity = 3
 
 [tool.cibuildwheel.linux]
-archs = ['x86_64']
+archs = ['x86_64', 'aarch64']
 
 [tool.cibuildwheel.linux.environment]
 VCPKG_INSTALLED = "$VCPKG_ROOT/installed/$VCPKG_DEFAULT_TRIPLET"
