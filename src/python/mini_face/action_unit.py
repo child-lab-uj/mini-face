@@ -5,7 +5,7 @@ from typing import Literal
 
 import numpy as np
 
-from .api import AUExtractor  # type: ignore
+from .api import AUExtractor as __AUExtractor  # type: ignore
 from .mode import PredictionMode
 
 __all__ = ["Extractor", "Result"]
@@ -13,11 +13,25 @@ __all__ = ["Extractor", "Result"]
 
 @dataclass(frozen=True)
 class Result:
+    """
+    Represents the result of a gaze estimation.\\
+    **All arrays have leading dimensions corresponding to batch**, even for a single frame detection.\\
+    The class and its fields are **immutable**.
+
+    Attributes
+    ----------
+    action_units: np.ndarray
+        `batch x number_of_units` array where each row contains action unit IDs detected in each batch frame.
+
+    intensities: np.ndarray
+        `batch x number_of_units` array where each row represents intensities of action units detected in each batch frame.
+    """
+
     action_units: np.ndarray[tuple[int, int], np.dtype[np.int64]]
     intensities: np.ndarray[tuple[int, int], np.dtype[np.float64]]
 
 
-def time(step: float) -> Generator[float, None, None]:
+def __time(step: float) -> Generator[float, None, None]:
     current = 0.0
 
     while True:
@@ -26,7 +40,7 @@ def time(step: float) -> Generator[float, None, None]:
 
 
 # skip typing - ndarray dtype is an absolute garbage
-def as_padded_and_imputed_with_zeros_array(
+def __as_padded_and_imputed_with_zeros_array(
     data: list[list | None], dtype
 ) -> np.ndarray:
     n_rows = len(data)
@@ -46,25 +60,21 @@ def as_padded_and_imputed_with_zeros_array(
     return array
 
 
-def convert(au_label: str) -> int:
+def __convert(au_label: str) -> int:
     return int("".join(filter(str.isdigit, au_label)) or "0")
 
 
 class Extractor:
-    landmark_mode: PredictionMode
-    au_mode: PredictionMode
-    wild: bool
-    multiple_views: bool
-    limit_angles: bool
-    optimization_iterations: int | None
-    regularization_factor: float | None
-    weight_factor: float | None
+    """
+    Action Unit extractor.
 
-    fps: int
+    Methods
+    ----------
+    predict(frame, region)
+        Perform prediction.
+    """
 
-    models: Path
-
-    __model: AUExtractor
+    __model: __AUExtractor
     __time: Generator[float, None, None]
     __time_step: float = 1.0 / 60.0
 
@@ -73,15 +83,42 @@ class Extractor:
         *,
         landmark_mode: PredictionMode,
         au_mode: PredictionMode,
+        models_directory: Path,
         fps: int = 60,
         wild: bool = False,
-        models_directory: str,
         multiple_views: bool = True,
         limit_angles: bool = False,
         optimization_iterations: int | None = None,
         regularization_factor: float | None = None,
         weight_factor: float | None = None,
     ) -> None:
+        """
+        Initializes action unit extractor instance.
+
+        Parameters
+        ----------
+        landmark_mode: PredictionMode)
+            The prediction mode used in **face landmark detection** stage (image or video).
+
+        au_mode: PredictionMode
+            The prediction mode used in **AU estimation stage** (image or video).
+
+        models_directory: Path
+            The directory where OpenFace weights are stored.
+
+        fps: int | None
+            Video framerate, default is 60. Ignored in image mode.
+
+        wild: bool | None
+            Flag indicating if "wild" settings from OpenFace are used, default is False.
+
+        multiple_views: bool | None
+            Flag indicating if "multiple view" settings from OpenFace are used, default is True.
+
+        limit_angles: bool | None
+            Flag indicating if angle limiting should be enforced, default is False.
+        """
+
         if optimization_iterations is not None:
             assert (
                 optimization_iterations > 0
@@ -95,22 +132,12 @@ class Extractor:
         if weight_factor is not None:
             assert weight_factor > 0.0, "Optimization weight factor must be positive"
 
-        models = Path(models_directory)
-        assert models.exists() and models.is_dir(), "Invalid models directory passed"
-        self.models = models
+        assert (
+            models_directory.exists() and models_directory.is_dir()
+        ), "Invalid models directory passed"
 
-        self.mode = landmark_mode
-        self.wild = wild
-        self.multiple_views = multiple_views
-        self.limit_angles = limit_angles
-        self.optimization_iterations = optimization_iterations
-        self.regularization_factor = regularization_factor
-        self.weight_factor = weight_factor
-
-        self.fps = fps
-
-        self.__model = AUExtractor(
-            models_directory,
+        self.__model = __AUExtractor(
+            str(models_directory),
             landmark_mode == PredictionMode.VIDEO,
             au_mode == PredictionMode.VIDEO,
             wild,
@@ -121,7 +148,7 @@ class Extractor:
             weight_factor,
         )
 
-        self.__time = time(1.0 / float(fps))
+        self.__time = __time(1.0 / float(fps))
 
     def predict(
         self,
@@ -130,6 +157,28 @@ class Extractor:
         region: np.ndarray[tuple[Literal[4]], np.dtype[np.uint32]]
         | np.ndarray[tuple[int, Literal[4]], np.dtype[np.uint32]],
     ) -> Result | None:
+        """
+        Predict Action Units for one face.
+
+        Parameters
+        ----------
+        frame: np.ndarray
+            Image (`height x width x 3`) or batch of images (batch x height x width x 3) in 0-255 RGB format to perform prediction on.
+
+        region: np.ndarray
+            Bounding box (`4` elements) or batch of bounding boxes (`batch x 4`) in xyxy format, **one per frame**, containing faces to analyze.
+
+        Returns
+        ----------
+        result: Result | None
+            Result containing detection if successful, None otherwise.
+
+        Raises
+        ----------
+        ValueError
+            If passed arrays don't match shape requirements
+        """
+
         match frame.shape, region.shape:
             case (_, _, n_channels), (n_elements,):
                 assert (
@@ -146,17 +195,23 @@ class Extractor:
                 if prediction is None:
                     return None
 
-                return Result(
-                    np.array(
-                        ([convert(unit[0]) for unit in prediction],), dtype=np.int64
-                    ),
-                    np.array(([unit[1] for unit in prediction],), dtype=np.float64),
+                units = np.array(
+                    ([__convert(unit[0]) for unit in prediction],), dtype=np.int64
                 )
+
+                intensities = np.array(
+                    ([unit[1] for unit in prediction],), dtype=np.float64
+                )
+
+                units.flags.writeable = False
+                units.flags.writeable = False
+
+                return Result(units, intensities)
 
             case (n_frames, _, _, n_channels), (n_regions, n_elements):
                 assert (
                     n_frames == n_regions
-                ), f"Number of frames ({n_frames}) doesn't match number of regions ({n_regions})"
+                ), f"Number of frames ({n_frames}) doesn't match the number of regions ({n_regions})"
                 assert (
                     n_elements == 4
                 ), f"Wrong region format: expected 4 elements, got {n_elements}"
@@ -170,7 +225,7 @@ class Extractor:
                 ]
 
                 units = [
-                    [convert(unit[0]) for unit in prediction]
+                    [__convert(unit[0]) for unit in prediction]
                     if prediction is not None
                     else None
                     for prediction in predictions
@@ -181,14 +236,19 @@ class Extractor:
                     for prediction in predictions
                 ]
 
-                return Result(
-                    as_padded_and_imputed_with_zeros_array(units, np.int64),
-                    as_padded_and_imputed_with_zeros_array(intensities, np.float64),
+                units = __as_padded_and_imputed_with_zeros_array(units, np.int64)
+                intensities = __as_padded_and_imputed_with_zeros_array(
+                    intensities, np.float64
                 )
+
+                units.flags.writeable = False
+                intensities.flags.writeable = False
+
+                return Result(units, intensities)
 
             case _:
                 raise RuntimeError(
                     f"Wrong shapes of arguments:\n"
-                    f"frame.shape: expected ([n,] height, width, 3), got {frame.shape},\n"
-                    f"region.shape: expected ([n,] 4), got {region.shape}"
+                    f"frame.shape: expected ([batch,] height, width, 3), got {frame.shape},\n"
+                    f"region.shape: expected ([batch,] 4), got {region.shape}"
                 )
