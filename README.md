@@ -1,34 +1,39 @@
-# Mini-face
+# mini-face
 
-## Installation with pip
-> Requirements: `python 3.12`, `numpy >= 1.21`.
+## Installation with `pip`
+> Requirements: `python >= 3.12`, `numpy >= 1.21`.
 1. Install the package with a following command:
-```
+```shell
    python3 -m pip install mini-face
 ```
 2. Download model data files (subdirectories **/model/** and **/AU_predictors/**) from this repository or official
    <a href="https://github.com/TadasBaltrusaitis/OpenFace/releases" title="OpenFace releases">OpenFace release</a>.
    You will also need files from <a href="https://github.com/TadasBaltrusaitis/OpenFace/wiki/Model-download" title="OpenFace models">here</a>.
 
-## Python usage
-Below is a minimalist example of using the module from Python code:
+## Example
+To estimate gaze on a single image, simply run:
 
-```
-   import cv2
-   import numpy as np
-   from mini_face import GazeFeatureExtractor
-   from mini_face import PredictionMode
+```python
+from pathlib import Path
 
-   if __name__ == "__main__":
-      image = cv2.imread("test_image.jpg")
-      extractor = GazeFeatureExtractor(
-        mode=PredictionMode.IMAGE,
-        focal_length=(500, 500),
-        optical_center=(860.0, 540.0),
-        models_directory="./model",
-      )
+import cv2
+import numpy as np
+from mini_face import gaze, PredictionMode
 
-       result = extractor.predict(image, np.array([0.0, 0.0, 1080.0, 1920.0]))
 
-       print(f"{result = }")
+if __name__ == "__main__":
+    extractor = gaze.Extractor(
+        mode=PredictionMode.IMAGE,         # Specify prediction mode
+        focal_length=(500.0, 500.0),       # Specify camera parameters
+        optical_center=(860.0, 540.0),     # required for proper 3D estimation
+        models_directory=Path("./model"),  # Pass a directory to search for OpenFace weights in
+    )
+
+    image = cv2.imread("test_image.jpg")
+    result = extractor.predict(
+        image,                             # Pass the image to analyze
+        np.array([0, 0, 1080, 1920])       # along with a region to search for face in
+    )
+
+    print(f"{result = }")
 ```
