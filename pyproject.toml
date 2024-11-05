@@ -27,7 +27,7 @@ requires = [
 ]
 
 [tool.cibuildwheel]
-skip = ["pp*", "*musllinux*"]
+skip = ["pp*", "*musllinux*", "*win32*"]
 manylinux-x86_64-image = "manylinux_x86_64:latest"
 manylinux-aarch64-image = "manylinux-aarch64:latest"
 build-verbosity = 3
