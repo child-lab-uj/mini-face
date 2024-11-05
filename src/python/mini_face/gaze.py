@@ -13,9 +13,9 @@ __all__ = ["Extractor", "Result"]
 
 @dataclass(frozen=True)
 class Result:
-    eyes: np.ndarray[Literal[3], np.dtype[np.float32]]
-    directions: np.ndarray[Literal[3], np.dtype[np.float32]]
-    angles: np.ndarray[Literal[2], np.dtype[np.float32]]
+    eyes: np.ndarray[tuple[int, Literal[3]], np.dtype[np.float32]]
+    directions: np.ndarray[tuple[int, Literal[3]], np.dtype[np.float32]]
+    angles: np.ndarray[tuple[int, Literal[2]], np.dtype[np.float32]]
 
 
 def time(step: float) -> Generator[float, None, None]:
@@ -122,10 +122,10 @@ class Extractor:
 
     def predict(
         self,
-        frame: np.ndarray[Literal[3], np.dtype[np.uint8]]
-        | np.ndarray[Literal[4], np.dtype[np.uint8]],
-        region: np.ndarray[Literal[1], np.dtype[np.uint32]]
-        | np.ndarray[Literal[2], np.dtype[np.uint32]],
+        frame: np.ndarray[tuple[int, int, Literal[3]], np.dtype[np.uint8]]
+        | np.ndarray[tuple[int, int, int, Literal[3]], np.dtype[np.uint8]],
+        region: np.ndarray[tuple[Literal[4]], np.dtype[np.uint32]]
+        | np.ndarray[tuple[int, Literal[4]], np.dtype[np.uint32]],
     ) -> Result | None:
         match frame.shape, region.shape:
             case (_, _, n_channels), (n_elements,):
