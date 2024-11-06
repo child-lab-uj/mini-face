@@ -26,6 +26,7 @@ ENV PATH="${PATH}:/opt/vcpkg"
 ENV VCPKG_DEFAULT_TRIPLET="arm64-linux"
 ENV VCPKG_FORCE_SYSTEM_BINARIES=1
 
+
 RUN bootstrap-vcpkg.sh && \
     mkdir -p /root/.vcpkg/ $HOME/.vcpkg && \
     touch /root/.vcpkg/vcpkg.path.txt $HOME/.vcpkg/vcpkg.path.txt && \
