@@ -1,39 +1,39 @@
 # Inspired by https://github.com/geopandas/pyogrio
 
-FROM quay.io/pypa/manylinux_2_28_x86_64
+FROM --platform=linux/x86_64 quay.io/pypa/manylinux_2_28_x86_64
 
-# Required system dependencies:
-#   * libepoxy: libx11-dev libgles2-mesa-dev
-#   * libxcrypt: autoconf automake libtool pkg-config
-#   * python3: autoconf autoconf-archive automake
-#   * openssl: perl-ICP-Cmd
+# Required dependencies installed by system manager:
+#   * general: cmake, ninja-build
+#   * mini-face: openblas
+#   * pybind11: python3*
+#   * python311: autoconf, autoconf-archive, automake
 RUN yum -y install \
-    curl zip unzip tar \
-    cmake ninja-build \
-    autoconf autoconf-archive automake libtool pkg-config \
-    perl-IPC-Cmd \
-    python311 \
-    opencv opencv-devel \
-    openblas openblas-devel
+    curl \
+    zip unzip tar \
+    autoconf autoconf-archive automake cmake ninja-build \
+    libtool pkg-config \
+    python311
 
-RUN git clone https://github.com/Microsoft/vcpkg.git /opt/vcpkg && \
-    git -C /opt/vcpkg checkout tags/2024.09.30
+
+RUN --mount=type=cache,target=/tmp/git_cache/vcpkg \
+    git clone https://github.com/Microsoft/vcpkg.git /tmp/git_cache/vcpkg && \
+    cp -r /tmp/git_cache/vcpkg /opt/vcpkg
+
+RUN git -C /opt/vcpkg checkout tags/2024.09.30
 
 ENV VCPKG_ROOT="/opt/vcpkg"
 ENV PATH="${PATH}:/opt/vcpkg"
-
 ENV VCPKG_DEFAULT_TRIPLET="x64-linux"
 
-# mkdir & touch -> workaround for https://github.com/microsoft/vcpkg/issues/27786
 RUN bootstrap-vcpkg.sh && \
     mkdir -p /root/.vcpkg/ $HOME/.vcpkg && \
     touch /root/.vcpkg/vcpkg.path.txt $HOME/.vcpkg/vcpkg.path.txt && \
     vcpkg integrate install && \
     vcpkg integrate bash
 
-COPY vcpkg.json opt/vcpkg/
+COPY .github/manifests/linux_x86_64/vcpkg.json /opt/vcpkg/
 
-ENV LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/usr/lib/:/opt/vcpkg/installed/x64-linux/lib"
+ENV LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/usr/lib/:/usr/lib64/:/opt/vcpkg/installed/x64-linux/lib"
 
 RUN vcpkg install \
     --feature-flags="versions,manifests" \
@@ -41,6 +41,22 @@ RUN vcpkg install \
     --x-install-root=opt/vcpkg/installed && \
     vcpkg list
 
-# setting git safe directory is required for properly building wheels when
-# git >= 2.35.3
+
+RUN --mount=type=cache,target=/tmp/git_cache/dlib \
+    git clone https://github.com/davisking/dlib.git /tmp/git_cache/dlib && \
+    cp -r /tmp/git_cache/dlib /opt/dlib
+
+RUN --mount=type=cache,target=/tmp/git_cache/opencv \
+    git clone https://github.com/opencv/opencv.git /tmp/git_cache/opencv && \
+    cp -r /tmp/git_cache/opencv /opt/opencv
+
+RUN mkdir -p /opt/scripts
+COPY --chmod=777 .github/scripts/build_and_install_dependency.sh /opt/scripts
+
+RUN /opt/scripts/build_and_install_dependency.sh dlib && \
+    /opt/scripts/build_and_install_dependency.sh opencv
+
+# Link the opencv & dlib libraries
+ENV LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/opt/opencv/build/lib:/opt/dlib/build/dlib"
+
 RUN git config --global --add safe.directory "*"
