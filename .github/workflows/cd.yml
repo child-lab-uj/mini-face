@@ -53,6 +53,10 @@ jobs:
         with:
           vcpkgDirectory: "${{ github.workspace }}/vcpkg"
 
+      - name: Replace vcpkg manifest
+        run: |
+          cp .github/manifests/macos/vcpkg.json .
+
       - name: Build wheel
         uses: pypa/cibuildwheel@v2.21.1
 
