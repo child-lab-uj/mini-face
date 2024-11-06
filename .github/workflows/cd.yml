@@ -7,6 +7,38 @@ on:
 
 jobs:
   # TODO: think about reusing these jobs instead of duplicating them
+  build-windows:
+    name: Build wheels on Windows x64
+
+    runs-on: windows-2022
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set default triplet
+        run: echo "VCPKG_DEFAULT_TRIPLET=x64-windows" >> $GITHUB_ENV
+
+      - name: Install vcpkg
+        uses: lukka/run-vcpkg@v11.5
+        with:
+          vcpkgDirectory: "${{ github.workspace }}\\vcpkg"
+          triplet: "x64-windows"
+
+      - name: Build wheel
+        uses: pypa/cibuildwheel@v2.21.1
+        with:
+          platform: "windows"
+          python-version: "3.12"
+          architecture: "x64"
+
+      - name: Store wheel
+        uses: actions/upload-artifact@v4
+        with:
+          name: "mini-face-win_2022_x64"
+          path: .\\wheelhouse\\*.whl
+          compression-level: 0
+
   build-macos:
     name: Build wheels on macOS arm-x64
 
@@ -23,7 +55,7 @@ jobs:
 
       - name: Replace vcpkg manifest
         run: |
-          cp .github/macos/vcpkg.json .
+          cp .github/manifests/macos/vcpkg.json .
 
       - name: Build wheel
         uses: pypa/cibuildwheel@v2.21.1
@@ -52,6 +84,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Replace vcpkg manifest
+        run: |
+          cp .github/manifests/linux_${{ matrix.architecture }}/vcpkg.json .
+
       - name: Set up Docker Buildx
         id: buildx
         uses: docker/setup-buildx-action@v3
@@ -73,8 +109,6 @@ jobs:
         env:
           BUILDKIT_PROGRESS: plain
 
-      - uses: actions/checkout@v4
-
       - name: Build wheel
         uses: pypa/cibuildwheel@v2.21.1
 
@@ -92,6 +126,7 @@ jobs:
     needs:
       - build-macos
       - build-linux
+      - build-windows
 
     runs-on: ubuntu-latest
 
@@ -120,7 +155,7 @@ jobs:
 
       - name: Publish distribution to Test PyPI
         run: |
-          twine upload -r pypi ./wheelhouse/*.whl
+          twine upload -r testpypi ./wheelhouse/*.whl
         env:
           TWINE_USERNAME: __token__
           TWINE_PASSWORD: ${{ secrets.PYPI_KEY }}

@@ -5,7 +5,7 @@ from typing import Literal
 
 import numpy as np
 
-from .api import GazeExtractor  # type: ignore
+from .api import GazeExtractor as __GazeExtractor  # type: ignore
 from .mode import PredictionMode
 
 __all__ = ["Extractor", "Result"]
@@ -13,12 +13,29 @@ __all__ = ["Extractor", "Result"]
 
 @dataclass(frozen=True)
 class Result:
-    eyes: np.ndarray[Literal[3], np.dtype[np.float32]]
-    directions: np.ndarray[Literal[3], np.dtype[np.float32]]
-    angles: np.ndarray[Literal[2], np.dtype[np.float32]]
+    """
+    Represents the result of a gaze estimation.\\
+    **All arrays have leading dimensions corresponding to batch**, even for a single frame detection.\\
+    The class and its fields are **immutable**.
+
+    Attributes
+    ----------
+    eyes: np.ndarray
+        `batch x 2 x 3` array containing coordinates of pairs of eyes detected in each batch frame.
+
+    directions: np.ndarray
+        `batch x 2 x 3` array containing pairs of gaze directions corresponding to eyes in each batch frame.
+
+    angles: np.ndarray
+        `batch x 2` array where each row represents the angle between gaze directions in each batch frame.
+    """
+
+    eyes: np.ndarray[tuple[int, Literal[2], Literal[3]], np.dtype[np.float32]]
+    directions: np.ndarray[tuple[int, Literal[2], Literal[3]], np.dtype[np.float32]]
+    angles: np.ndarray[tuple[int, Literal[2]], np.dtype[np.float32]]
 
 
-def time(step: float) -> Generator[float, None, None]:
+def __time(step: float) -> Generator[float, None, None]:
     current = 0.0
 
     while True:
@@ -26,27 +43,20 @@ def time(step: float) -> Generator[float, None, None]:
         current += step
 
 
-EMPTY_ENTRY = ((0.0, 0.0, 0.0), (0.0, 0.0, 0.0))
+__EMPTY_ENTRY = ((0.0, 0.0, 0.0), (0.0, 0.0, 0.0))
 
 
 class Extractor:
-    mode: PredictionMode
-    wild: bool
-    multiple_views: bool
-    limit_angles: bool
-    optimization_iterations: int | None
-    regularization_factor: float | None
-    weight_factor: float | None
+    """
+    Gaze extractor.
 
-    fps: int
-    fx: float
-    fy: float
-    cx: float
-    cy: float
+    Methods
+    ----------
+    predict(frame, region)
+        Perform prediction.
+    """
 
-    models: Path
-
-    __model: GazeExtractor
+    __model: __GazeExtractor
     __time: Generator[float, None, None]
     __time_step: float = 1.0 / 60.0
 
@@ -56,7 +66,7 @@ class Extractor:
         mode: PredictionMode,
         focal_length: tuple[float, float],
         optical_center: tuple[float, float],
-        models_directory: str,
+        models_directory: Path,
         fps: int = 60,
         wild: bool = False,
         multiple_views: bool = True,
@@ -65,6 +75,36 @@ class Extractor:
         regularization_factor: float | None = None,
         weight_factor: float | None = None,
     ) -> None:
+        """
+        Initializes gaze extractor instance.
+
+        Parameters
+        ----------
+        mode: PredictionMode
+            The prediction mode (image or video).
+
+        focal_length: tuple[float, float]
+            A tuple of **positive** numbers representing the camera's focal lengths (fx, fy).
+
+        optical_center: tuple[float, float]
+            A tuple of **positive** numbers representing the camera's optical center (cx, cy).
+
+        models_directory: Path
+            The directory where OpenFace weights are stored.
+
+        fps: int | None
+            Video framerate, default is 60. Ignored in image mode.
+
+        wild: bool | None
+            Flag indicating if "wild" settings from OpenFace are used, default is False.
+
+        multiple_views: bool | None
+            Flag indicating if "multiple view" settings from OpenFace are used, default is True.
+
+        limit_angles: bool | None
+            Flag indicating if angle limiting should be enforced, default is False.
+        """
+
         fx, fy = focal_length
         cx, cy = optical_center
 
@@ -72,6 +112,8 @@ class Extractor:
         assert fy > 0.0, "Focal length components must be positive"
         assert cx > 0.0, "Optical center coordinates must be positive"
         assert cy > 0.0, "Optical center coordinates must be positive"
+
+        assert fps > 0, "Framerate must be positive"
 
         if optimization_iterations is not None:
             assert (
@@ -86,26 +128,12 @@ class Extractor:
         if weight_factor is not None:
             assert weight_factor > 0.0, "Optimization weight factor must be positive"
 
-        models = Path(models_directory)
-        assert models.exists() and models.is_dir(), "Invalid models directory passed"
-        self.models = models
+        assert (
+            models_directory.exists() and models_directory.is_dir()
+        ), "Invalid models directory passed"
 
-        self.mode = mode
-        self.wild = wild
-        self.multiple_views = multiple_views
-        self.limit_angles = limit_angles
-        self.optimization_iterations = optimization_iterations
-        self.regularization_factor = regularization_factor
-        self.weight_factor = weight_factor
-
-        self.fps = fps
-        self.fx = fx
-        self.fy = fy
-        self.cx = cx
-        self.cy = cy
-
-        model = GazeExtractor(
-            models_directory,
+        model = __GazeExtractor(
+            str(models_directory),
             mode == PredictionMode.VIDEO,
             wild,
             multiple_views,
@@ -118,15 +146,37 @@ class Extractor:
         model.set_camera_calibration(fx, fy, cx, cy)
 
         self.__model = model
-        self.__time = time(1.0 / float(fps))
+        self.__time = __time(1.0 / float(fps))
 
     def predict(
         self,
-        frame: np.ndarray[Literal[3], np.dtype[np.uint8]]
-        | np.ndarray[Literal[4], np.dtype[np.uint8]],
-        region: np.ndarray[Literal[1], np.dtype[np.uint32]]
-        | np.ndarray[Literal[2], np.dtype[np.uint32]],
+        frame: np.ndarray[tuple[int, int, Literal[3]], np.dtype[np.uint8]]
+        | np.ndarray[tuple[int, int, int, Literal[3]], np.dtype[np.uint8]],
+        region: np.ndarray[tuple[Literal[4]], np.dtype[np.uint32]]
+        | np.ndarray[tuple[int, Literal[4]], np.dtype[np.uint32]],
     ) -> Result | None:
+        """
+        Predict gazes for one face.
+
+        Parameters
+        ----------
+        frame: np.ndarray
+            Image (`height x width x 3`) or batch of images (batch x height x width x 3) in 0-255 RGB format to perform prediction on.
+
+        region: np.ndarray
+            Array (`4` elements) or batch of arrays (`batch x 4`) of xyxy bounding boxes (**one per frame**) containing faces to analyze.
+
+        Returns
+        ----------
+        result: Result | None
+            Result containing detection if successful, None otherwise.
+
+        Raises
+        ----------
+        ValueError
+            If passed arrays don't match shape requirements
+        """
+
         match frame.shape, region.shape:
             case (_, _, n_channels), (n_elements,):
                 assert (
@@ -148,7 +198,7 @@ class Extractor:
                     np.array(
                         ((result.direction1, result.direction2),), dtype=np.float32
                     ),
-                    result.angle,
+                    np.array(result.angle),
                 )
 
             case (n_frames, _, _, n_channels), (n_regions, n_elements):
@@ -171,7 +221,7 @@ class Extractor:
                     [
                         (prediction.eye1, prediction.eye2)
                         if prediction is not None
-                        else EMPTY_ENTRY
+                        else __EMPTY_ENTRY
                         for prediction in predictions
                     ],
                     dtype=np.float32,
@@ -181,7 +231,7 @@ class Extractor:
                     [
                         (prediction.direction1, prediction.direction2)
                         if prediction is not None
-                        else EMPTY_ENTRY
+                        else __EMPTY_ENTRY
                         for prediction in predictions
                     ],
                     dtype=np.float32,
@@ -195,11 +245,15 @@ class Extractor:
                     dtype=np.float32,
                 )
 
+                eyes.flags.writeable = False
+                directions.flags.writeable = False
+                angles.flags.writeable = False
+
                 return Result(eyes, directions, angles)
 
             case _:
-                raise RuntimeError(
+                raise ValueError(
                     f"Wrong shapes of arguments:\n"
-                    f"frame.shape: expected ([n,] height, width, 3), got {frame.shape},\n"
-                    f"region.shape: expected ([n,] 4), got {region.shape}"
+                    f"frame.shape: expected ([batch,] height, width, 3), got {frame.shape},\n"
+                    f"region.shape: expected ([batch,] 4), got {region.shape}"
                 )

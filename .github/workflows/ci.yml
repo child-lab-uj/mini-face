@@ -2,6 +2,38 @@ name: CI
 on: pull_request
 
 jobs:
+  build-windows:
+    name: Build wheels on Windows x64
+
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set default triplet
+        run: echo "VCPKG_DEFAULT_TRIPLET=x64-windows" >> $GITHUB_ENV
+
+      - name: Install vcpkg
+        uses: lukka/run-vcpkg@v11.5
+        with:
+          vcpkgDirectory: "${{ github.workspace }}\\vcpkg"
+          triplet: "x64-windows"
+
+      - name: Build wheel
+        uses: pypa/cibuildwheel@v2.21.1
+        with:
+          platform: "windows"
+          python-version: "3.12"
+          architecture: "x64"
+
+      - name: Store wheel
+        uses: actions/upload-artifact@v4
+        with:
+          name: "mini-face-win_2022_x64"
+          path: .\\wheelhouse\\*.whl
+          compression-level: 0
+
   build-macos:
     name: Build wheels on macOS arm-x64
 
@@ -18,7 +50,7 @@ jobs:
 
       - name: Replace vcpkg manifest
         run: |
-          cp .github/macos/vcpkg.json .
+          cp .github/manifests/macos/vcpkg.json .
 
       - name: Build wheel
         uses: pypa/cibuildwheel@v2.21.1
@@ -41,11 +73,14 @@ jobs:
           - wheel_name: "mini-face-manylinux_2_28_x86_64"
             architecture: "x86_64"
             container: ".github/containers/manylinux_x86_64.Dockerfile"
-          # TODO: add linux_aarch64
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Replace vcpkg manifest
+        run: |
+          cp .github/manifests/linux_${{ matrix.architecture }}/vcpkg.json .
 
       - name: Set up Docker Buildx
         id: buildx
@@ -67,8 +102,6 @@ jobs:
           cache-to: type=gha,mode=max
         env:
           BUILDKIT_PROGRESS: plain
-
-      - uses: actions/checkout@v4
 
       - name: Build wheel
         uses: pypa/cibuildwheel@v2.21.1
