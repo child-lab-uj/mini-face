@@ -6,9 +6,9 @@
 ```shell
    python3 -m pip install mini-face
 ```
-2. Download model data files (subdirectories **/model/** and **/AU_predictors/**) from this repository or official
-   <a href="https://github.com/TadasBaltrusaitis/OpenFace/releases" title="OpenFace releases">OpenFace release</a>.
-   You will also need files from <a href="https://github.com/TadasBaltrusaitis/OpenFace/wiki/Model-download" title="OpenFace models">here</a>.
+2. Download model data files (`model` and `AU_predictors`) from this repository or official
+   [OpenFace release](https://github.com/TadasBaltrusaitis/OpenFace/releases).
+   You will also need files from [OpenFace models](https://github.com/TadasBaltrusaitis/OpenFace/wiki/Model-download).
 
 ## Example
 To estimate gaze on a single image, simply run:
