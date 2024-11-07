@@ -30,7 +30,7 @@ jobs:
       - name: Store wheel
         uses: actions/upload-artifact@v4
         with:
-          name: "mini-face-win_2022_x64"
+          name: "wheel-mini-face-win_2022_x64"
           path: .\\wheelhouse\\*.whl
           compression-level: 0
 
