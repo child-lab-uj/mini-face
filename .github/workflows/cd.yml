@@ -7,37 +7,39 @@ on:
 
 jobs:
   # TODO: think about reusing these jobs instead of duplicating them
-  build-windows:
-    name: Build wheels on Windows x64
 
-    runs-on: windows-2022
+  # TODO: Investigate error happening when uploading Windows wheels
+  # build-windows:
+  #   name: Build wheels on Windows x64
 
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+  #   runs-on: windows-2022
 
-      - name: Set default triplet
-        run: echo "VCPKG_DEFAULT_TRIPLET=x64-windows" >> $GITHUB_ENV
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v4
 
-      - name: Install vcpkg
-        uses: lukka/run-vcpkg@v11.5
-        with:
-          vcpkgDirectory: "${{ github.workspace }}\\vcpkg"
-          triplet: "x64-windows"
+  #     - name: Set default triplet
+  #       run: echo "VCPKG_DEFAULT_TRIPLET=x64-windows" >> $GITHUB_ENV
 
-      - name: Build wheel
-        uses: pypa/cibuildwheel@v2.21.1
-        with:
-          platform: "windows"
-          python-version: "3.12"
-          architecture: "x64"
+  #     - name: Install vcpkg
+  #       uses: lukka/run-vcpkg@v11.5
+  #       with:
+  #         vcpkgDirectory: "${{ github.workspace }}\\vcpkg"
+  #         triplet: "x64-windows"
 
-      - name: Store wheel
-        uses: actions/upload-artifact@v4
-        with:
-          name: "wheel-mini-face-win_2022_x64"
-          path: .\\wheelhouse\\*.whl
-          compression-level: 0
+  #     - name: Build wheel
+  #       uses: pypa/cibuildwheel@v2.21.1
+  #       with:
+  #         platform: "windows"
+  #         python-version: "3.12"
+  #         architecture: "x64"
+
+  #     - name: Store wheel
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name: "wheel-mini-face-win_2022_x64"
+  #         path: .\\wheelhouse\\*.whl
+  #         compression-level: 0
 
   build-macos:
     name: Build wheels on macOS arm-x64
@@ -126,7 +128,7 @@ jobs:
     needs:
       - build-macos
       - build-linux
-      - build-windows
+      # - build-windows
 
     runs-on: ubuntu-latest
 
