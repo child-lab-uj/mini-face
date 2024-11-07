@@ -35,7 +35,7 @@ jobs:
       - name: Store wheel
         uses: actions/upload-artifact@v4
         with:
-          name: "mini-face-win_2022_x64"
+          name: "wheel-mini-face-win_2022_x64"
           path: .\\wheelhouse\\*.whl
           compression-level: 0
 
@@ -153,9 +153,9 @@ jobs:
           path: ./wheelhouse/
           merge-multiple: true
 
-      - name: Publish distribution to Test PyPI
+      - name: Publish distribution to PyPI
         run: |
-          twine upload -r testpypi ./wheelhouse/*.whl
+          twine upload -r pypi ./wheelhouse/*.whl
         env:
           TWINE_USERNAME: __token__
           TWINE_PASSWORD: ${{ secrets.PYPI_KEY }}
