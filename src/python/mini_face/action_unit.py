@@ -5,7 +5,6 @@ from typing import Literal
 
 import numpy as np
 
-from .api import AUExtractor as RawExtractor  # type: ignore
 from .mode import PredictionMode
 
 __all__ = ["Extractor", "Result"]
@@ -31,39 +30,6 @@ class Result:
     intensities: np.ndarray[tuple[int, int], np.dtype[np.float64]]
 
 
-def __time(step: float) -> Generator[float, None, None]:
-    current = 0.0
-
-    while True:
-        yield current
-        current += step
-
-
-# skip typing - ndarray dtype is an absolute garbage
-def __as_padded_and_imputed_with_zeros_array(
-    data: list[list | None], dtype
-) -> np.ndarray:
-    n_rows = len(data)
-    n_columns: int = len(max(filter(None, data), key=len, default=[]))
-
-    if n_columns == 0:
-        return np.zeros((1, 1), dtype=dtype)
-
-    array = np.zeros((n_rows, n_columns), dtype=dtype)
-
-    for i, row in enumerate(data):
-        if row is None:
-            continue
-
-        np.copyto(array[i, : len(row)], row, casting="same_kind")
-
-    return array
-
-
-def __convert(au_label: str) -> int:
-    return int("".join(filter(str.isdigit, au_label)) or "0")
-
-
 class Extractor:
     """
     Action Unit extractor.
@@ -74,9 +40,11 @@ class Extractor:
         Perform prediction.
     """
 
-    __model: RawExtractor
+    # Import from API here to avoid exposition of raw C++ bindings
+    from .api import AUExtractor as __RawExtractor  # type: ignore
+
+    __model: __RawExtractor
     __time: Generator[float, None, None]
-    __time_step: float = 1.0 / 60.0
 
     def __init__(
         self,
@@ -136,7 +104,7 @@ class Extractor:
             models_directory.exists() and models_directory.is_dir()
         ), "Invalid models directory passed"
 
-        self.__model = RawExtractor(
+        self.__model = Extractor.__RawExtractor(
             str(models_directory),
             landmark_mode == PredictionMode.VIDEO,
             au_mode == PredictionMode.VIDEO,
@@ -148,7 +116,40 @@ class Extractor:
             weight_factor,
         )
 
-        self.__time = __time(1.0 / float(fps))
+        self.__time = Extractor.__timer(1.0 / float(fps))
+
+    @staticmethod
+    def __timer(step: float) -> Generator[float, None, None]:
+        current = 0.0
+
+        while True:
+            yield current
+            current += step
+
+    @staticmethod
+    def __convert(au_label: str) -> int:
+        return int("".join(filter(str.isdigit, au_label)) or "0")
+
+    # skip typing - ndarray dtype is an absolute garbage
+    @staticmethod
+    def __as_padded_and_imputed_with_zeros_array(
+        data: list[list | None], dtype
+    ) -> np.ndarray:
+        n_rows = len(data)
+        n_columns: int = len(max(filter(None, data), key=len, default=[]))
+
+        if n_columns == 0:
+            return np.zeros((1, 1), dtype=dtype)
+
+        array = np.zeros((n_rows, n_columns), dtype=dtype)
+
+        for i, row in enumerate(data):
+            if row is None:
+                continue
+
+            np.copyto(array[i, : len(row)], row, casting="same_kind")
+
+        return array
 
     def predict(
         self,
@@ -196,7 +197,8 @@ class Extractor:
                     return None
 
                 units = np.array(
-                    ([__convert(unit[0]) for unit in prediction],), dtype=np.int64
+                    ([Extractor.__convert(unit[0]) for unit in prediction],),
+                    dtype=np.int64,
                 )
 
                 intensities = np.array(
@@ -225,7 +227,7 @@ class Extractor:
                 ]
 
                 units = [
-                    [__convert(unit[0]) for unit in prediction]
+                    [Extractor.__convert(unit[0]) for unit in prediction]
                     if prediction is not None
                     else None
                     for prediction in predictions
@@ -236,8 +238,10 @@ class Extractor:
                     for prediction in predictions
                 ]
 
-                units = __as_padded_and_imputed_with_zeros_array(units, np.int64)
-                intensities = __as_padded_and_imputed_with_zeros_array(
+                units = Extractor.__as_padded_and_imputed_with_zeros_array(
+                    units, np.int64
+                )
+                intensities = Extractor.__as_padded_and_imputed_with_zeros_array(
                     intensities, np.float64
                 )
 
