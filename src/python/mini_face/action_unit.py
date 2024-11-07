@@ -5,7 +5,7 @@ from typing import Literal
 
 import numpy as np
 
-from .api import AUExtractor as __AUExtractor  # type: ignore
+from .api import AUExtractor as RawExtractor  # type: ignore
 from .mode import PredictionMode
 
 __all__ = ["Extractor", "Result"]
@@ -74,7 +74,7 @@ class Extractor:
         Perform prediction.
     """
 
-    __model: __AUExtractor
+    __model: RawExtractor
     __time: Generator[float, None, None]
     __time_step: float = 1.0 / 60.0
 
@@ -136,7 +136,7 @@ class Extractor:
             models_directory.exists() and models_directory.is_dir()
         ), "Invalid models directory passed"
 
-        self.__model = __AUExtractor(
+        self.__model = RawExtractor(
             str(models_directory),
             landmark_mode == PredictionMode.VIDEO,
             au_mode == PredictionMode.VIDEO,
