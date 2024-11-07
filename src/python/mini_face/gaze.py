@@ -5,7 +5,6 @@ from typing import Literal
 
 import numpy as np
 
-from .api import GazeExtractor as RawExtractor  # type: ignore
 from .mode import PredictionMode
 
 __all__ = ["Extractor", "Result"]
@@ -35,17 +34,6 @@ class Result:
     angles: np.ndarray[tuple[int, Literal[2]], np.dtype[np.float32]]
 
 
-def __time(step: float) -> Generator[float, None, None]:
-    current = 0.0
-
-    while True:
-        yield current
-        current += step
-
-
-__EMPTY_ENTRY = ((0.0, 0.0, 0.0), (0.0, 0.0, 0.0))
-
-
 class Extractor:
     """
     Gaze extractor.
@@ -56,9 +44,13 @@ class Extractor:
         Perform prediction.
     """
 
-    __model: RawExtractor
+    # Import from API here to avoid exposition of raw C++ bindings
+    from .api import GazeExtractor as __RawExtractor  # type: ignore
+
+    __model: __RawExtractor
     __time: Generator[float, None, None]
-    __time_step: float = 1.0 / 60.0
+
+    __EMPTY_ENTRY = ((0.0, 0.0, 0.0), (0.0, 0.0, 0.0))
 
     def __init__(
         self,
@@ -132,7 +124,7 @@ class Extractor:
             models_directory.exists() and models_directory.is_dir()
         ), "Invalid models directory passed"
 
-        model = RawExtractor(
+        model = Extractor.__RawExtractor(
             str(models_directory),
             mode == PredictionMode.VIDEO,
             wild,
@@ -146,7 +138,15 @@ class Extractor:
         model.set_camera_calibration(fx, fy, cx, cy)
 
         self.__model = model
-        self.__time = __time(1.0 / float(fps))
+        self.__time = Extractor.__timer(1.0 / float(fps))
+
+    @staticmethod
+    def __timer(step: float) -> Generator[float, None, None]:
+        current = 0.0
+
+        while True:
+            yield current
+            current += step
 
     def predict(
         self,
@@ -221,7 +221,7 @@ class Extractor:
                     [
                         (prediction.eye1, prediction.eye2)
                         if prediction is not None
-                        else __EMPTY_ENTRY
+                        else Extractor.__EMPTY_ENTRY
                         for prediction in predictions
                     ],
                     dtype=np.float32,
@@ -231,7 +231,7 @@ class Extractor:
                     [
                         (prediction.direction1, prediction.direction2)
                         if prediction is not None
-                        else __EMPTY_ENTRY
+                        else Extractor.__EMPTY_ENTRY
                         for prediction in predictions
                     ],
                     dtype=np.float32,
