@@ -79,7 +79,7 @@ std::optional<Gaze> GazeExtractor::detectGaze(const Frame& frame, double timesta
 
 cv::Point3f GazeExtractor::calculateEyeCenter(const std::vector<cv::Point3f> eyeLandmarks, Eye eye) const
 {
-    constexpr int NO_LANDMARKS = 8;
+    constexpr int NO_LANDMARKS = 28;
     cv::Point3f middle(0, 0, 0);
 
     for (int i = 0; i < NO_LANDMARKS; i++)
