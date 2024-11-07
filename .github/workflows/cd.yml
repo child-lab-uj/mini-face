@@ -155,7 +155,7 @@ jobs:
 
       - name: Publish distribution to PyPI
         run: |
-          twine upload -r pypi ./wheelhouse/*.whl
+          twine upload -r testpypi ./wheelhouse/*.whl
         env:
           TWINE_USERNAME: __token__
           TWINE_PASSWORD: ${{ secrets.PYPI_KEY }}
