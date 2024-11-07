@@ -5,7 +5,7 @@ from typing import Literal
 
 import numpy as np
 
-from .api import GazeExtractor as __GazeExtractor  # type: ignore
+from .api import GazeExtractor as RawExtractor  # type: ignore
 from .mode import PredictionMode
 
 __all__ = ["Extractor", "Result"]
@@ -56,7 +56,7 @@ class Extractor:
         Perform prediction.
     """
 
-    __model: __GazeExtractor
+    __model: RawExtractor
     __time: Generator[float, None, None]
     __time_step: float = 1.0 / 60.0
 
@@ -132,7 +132,7 @@ class Extractor:
             models_directory.exists() and models_directory.is_dir()
         ), "Invalid models directory passed"
 
-        model = __GazeExtractor(
+        model = RawExtractor(
             str(models_directory),
             mode == PredictionMode.VIDEO,
             wild,
